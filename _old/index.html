@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-N7Q5K189S5"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-N7Q5K189S5');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vijales - Software House do Futuro</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+
+<body>
+    <div class="loading">
+        <div class="loading-text">INITIALIZING...</div>
+    </div>
+
+    <!-- <div class="scanlines"></div> -->
+
+    <div id="canvas-container"></div>
+    <!-- <iframe src="3d_bg/vijales_3d_hero.html"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; border:none; z-index:0;"></iframe> -->
+    <!-- <iframe src="tron-board.html"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; border:none; z-index:0;"></iframe> -->
+    <!-- <iframe src="tron-bg.html" style="position:fixed; top:0; left:0; width:100%; height:100%; border:none; z-index:-1;"></iframe> -->
+    <!-- <div class="circle-bg">
+        <div class="circle-ring"></div>
+        <div class="circle-ring"></div>
+        <div class="circle-ring"></div>
+        <div class="circle-ring"></div>
+        <div class="circle-ring"></div>
+        <div class="circle-ring"></div>
+        <div class="tech-segment"></div>
+    </div>
+
+    <div class="hex-grid"></div>
+    <div class="scanlines"></div>
+    <div class="crt-flicker"></div>
+    <div class="energy-line"></div>
+    <div class="energy-line"></div> -->
+
+    <!-- Cursor customizado -->
+    <div class="cursor-trail"></div>
+    <div class="cursor-dot"></div>
+
+    <nav>
+        <div class="logo-container">
+            <div class="logo-v">
+                <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="10" y1="15" x2="20" y2="30" stroke="#ff4500" stroke-width="3" stroke-linecap="round" />
+                    <line x1="20" y1="30" x2="30" y2="45" stroke="#ff4500" stroke-width="4" stroke-linecap="round" />
+                    <line x1="50" y1="15" x2="40" y2="30" stroke="#ff4500" stroke-width="3" stroke-linecap="round" />
+                    <line x1="40" y1="30" x2="30" y2="45" stroke="#ff4500" stroke-width="4" stroke-linecap="round" />
+                    <circle cx="10" cy="15" r="3" fill="#ff4500" />
+                    <circle cx="20" cy="30" r="2.5" fill="#ff4500" />
+                    <circle cx="50" cy="15" r="3" fill="#ff4500" />
+                    <circle cx="40" cy="30" r="2.5" fill="#ff4500" />
+                    <circle cx="30" cy="45" r="3.5" fill="#ff4500" />
+                </svg>
+            </div>
+            <div class="logo">IJALES</div>
+        </div>
+
+        <!-- Desktop retractable menu toggle -->
+        <button class="nav-toggle" aria-controls="nav-drawer" aria-expanded="false" aria-label="Abrir menu">
+            <span class="hamburger" aria-hidden="true">
+                <span></span>
+                <span></span>
+                <span></span>
+            </span>
+        </button>
+
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#services">Serviços</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#contact">Contato</a></li>
+        </ul>
+    </nav>
+
+    <!-- Nav drawer and backdrop (desktop retractable menu) -->
+    <div class="nav-backdrop" id="nav-backdrop" hidden></div>
+    <aside class="nav-drawer" id="nav-drawer" hidden aria-hidden="true">
+        <button class="nav-drawer-close" aria-label="Fechar menu">×</button>
+        <ul class="nav-drawer-list">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#services">Serviços</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#contact">Contato</a></li>
+        </ul>
+    </aside>
+
+    <section class="hero" id="home">
+        <div class="tron-logo">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="100" cy="100" r="90" fill="none" stroke="#ff4500" stroke-width="2" opacity="0.3" />
+                <circle cx="100" cy="100" r="75" fill="none" stroke="#ff4500" stroke-width="1.5" opacity="0.25" />
+
+                <line x1="45" y1="50" x2="70" y2="85" stroke="#ff4500" stroke-width="8" stroke-linecap="round" />
+                <line x1="70" y1="85" x2="85" y2="110" stroke="#ff4500" stroke-width="8" stroke-linecap="round" />
+                <line x1="85" y1="110" x2="100" y2="135" stroke="#ff4500" stroke-width="10" stroke-linecap="round" />
+
+                <line x1="155" y1="50" x2="130" y2="85" stroke="#ff4500" stroke-width="8" stroke-linecap="round" />
+                <line x1="130" y1="85" x2="115" y2="110" stroke="#ff4500" stroke-width="8" stroke-linecap="round" />
+                <line x1="115" y1="110" x2="100" y2="135" stroke="#ff4500" stroke-width="10" stroke-linecap="round" />
+
+                <line x1="45" y1="50" x2="70" y2="85" stroke="#ff8c00" stroke-width="3" stroke-linecap="round"
+                    opacity="0.8" />
+                <line x1="70" y1="85" x2="85" y2="110" stroke="#ff8c00" stroke-width="3" stroke-linecap="round"
+                    opacity="0.8" />
+                <line x1="85" y1="110" x2="100" y2="135" stroke="#ff8c00" stroke-width="4" stroke-linecap="round"
+                    opacity="0.8" />
+                <line x1="155" y1="50" x2="130" y2="85" stroke="#ff8c00" stroke-width="3" stroke-linecap="round"
+                    opacity="0.8" />
+                <line x1="130" y1="85" x2="115" y2="110" stroke="#ff8c00" stroke-width="3" stroke-linecap="round"
+                    opacity="0.8" />
+                <line x1="115" y1="110" x2="100" y2="135" stroke="#ff8c00" stroke-width="4" stroke-linecap="round"
+                    opacity="0.8" />
+
+                <circle cx="45" cy="50" r="6" fill="#ff4500">
+                    <animate attributeName="r" values="6;8;6" dur="2s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="70" cy="85" r="5" fill="#ff4500">
+                    <animate attributeName="r" values="5;7;5" dur="2s" begin="0.3s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;0.6;1" dur="2s" begin="0.3s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="85" cy="110" r="5" fill="#ff4500">
+                    <animate attributeName="r" values="5;7;5" dur="2s" begin="0.6s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;0.6;1" dur="2s" begin="0.6s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="155" cy="50" r="6" fill="#ff4500">
+                    <animate attributeName="r" values="6;8;6" dur="2s" begin="0.2s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;0.6;1" dur="2s" begin="0.2s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="130" cy="85" r="5" fill="#ff4500">
+                    <animate attributeName="r" values="5;7;5" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;0.6;1" dur="2s" begin="0.5s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="115" cy="110" r="5" fill="#ff4500">
+                    <animate attributeName="r" values="5;7;5" dur="2s" begin="0.8s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;0.6;1" dur="2s" begin="0.8s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="100" cy="135" r="8" fill="#ff4500">
+                    <animate attributeName="r" values="8;10;8" dur="2s" begin="1s" repeatCount="indefinite" />
+                    <animate attributeName="opacity" values="1;0.6;1" dur="2s" begin="1s" repeatCount="indefinite" />
+                </circle>
+
+                <line x1="45" y1="50" x2="25" y2="35" stroke="#ff4500" stroke-width="2" opacity="0.5" />
+                <line x1="155" y1="50" x2="175" y2="35" stroke="#ff4500" stroke-width="2" opacity="0.5" />
+                <line x1="100" y1="135" x2="100" y2="160" stroke="#ff4500" stroke-width="3" opacity="0.5" />
+
+                <rect x="20" y="30" width="8" height="8" fill="none" stroke="#ff8c00" stroke-width="1.5" opacity="0.4"
+                    transform="rotate(45 24 34)" />
+                <rect x="172" y="30" width="8" height="8" fill="none" stroke="#ff8c00" stroke-width="1.5" opacity="0.4"
+                    transform="rotate(45 176 34)" />
+                <rect x="96" y="156" width="8" height="8" fill="none" stroke="#ff8c00" stroke-width="1.5" opacity="0.4"
+                    transform="rotate(45 100 160)" />
+
+                <path d="M 35 45 Q 40 40 45 45" stroke="#ff4500" stroke-width="1.5" fill="none" opacity="0.5" />
+                <path d="M 155 45 Q 160 40 165 45" stroke="#ff4500" stroke-width="1.5" fill="none" opacity="0.5" />
+            </svg>
+        </div>
+
+        <div class="tagline">The Software Has Changed</div>
+        <h1>VIJALES</h1>
+        <p class="subtitle">Desenvolvemos o futuro. Arquitetamos soluções digitais que transcendem o código e
+            transformam visões em realidade tecnológica.</p>
+        <a href="https://wa.me/5548998699159" class="cta-button"><span class="cta-button-text">Entrar em
+                contato</span></a>
+    </section>
+
+    <section class="features" id="services">
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="15" y1="10" x2="25" y2="25" stroke="#ff4500" stroke-width="3" />
+                    <line x1="25" y1="25" x2="30" y2="35" stroke="#ff4500" stroke-width="4" />
+                    <line x1="45" y1="10" x2="35" y2="25" stroke="#ff4500" stroke-width="3" />
+                    <line x1="35" y1="25" x2="30" y2="35" stroke="#ff4500" stroke-width="4" />
+                    <circle cx="15" cy="10" r="2.5" fill="#ff4500" />
+                    <circle cx="45" cy="10" r="2.5" fill="#ff4500" />
+                    <circle cx="30" cy="35" r="3" fill="#ff4500" />
+                    <circle cx="30" cy="30" r="15" fill="none" stroke="#ff4500" stroke-width="1" opacity="0.3" />
+                </svg>
+            </div>
+            <h3>Soluções Personalizadas</h3>
+            <p>
+                Desenvolvimento sob medida com código limpo e otimizado,
+                criando aplicações que atendem exatamente às necessidades do seu negócio com performance excepcional.
+            </p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="15" y1="10" x2="25" y2="25" stroke="#ff4500" stroke-width="3" />
+                    <line x1="25" y1="25" x2="30" y2="35" stroke="#ff4500" stroke-width="4" />
+                    <line x1="45" y1="10" x2="35" y2="25" stroke="#ff4500" stroke-width="3" />
+                    <line x1="35" y1="25" x2="30" y2="35" stroke="#ff4500" stroke-width="4" />
+                    <circle cx="15" cy="10" r="2.5" fill="#ff4500" />
+                    <circle cx="45" cy="10" r="2.5" fill="#ff4500" />
+                    <circle cx="30" cy="35" r="3" fill="#ff4500" />
+                    <rect x="10" y="5" width="40" height="40" fill="none" stroke="#ff4500" stroke-width="1"
+                        opacity="0.2" />
+                </svg>
+            </div>
+            <h3>Design Responsivo e Moderno</h3>
+            <p>Interfaces elegantes que funcionam perfeitamente em qualquer dispositivo,
+                proporcionando uma experiência fluida e profissional para seus usuários.</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">
+                <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="15" y1="10" x2="25" y2="25" stroke="#ff4500" stroke-width="3" />
+                    <line x1="25" y1="25" x2="30" y2="35" stroke="#ff4500" stroke-width="4" />
+                    <line x1="45" y1="10" x2="35" y2="25" stroke="#ff4500" stroke-width="3" />
+                    <line x1="35" y1="25" x2="30" y2="35" stroke="#ff4500" stroke-width="4" />
+                    <circle cx="15" cy="10" r="2.5" fill="#ff4500" />
+                    <circle cx="45" cy="10" r="2.5" fill="#ff4500" />
+                    <circle cx="30" cy="35" r="3" fill="#ff4500" />
+                    <path d="M 30 15 L 20 25 L 30 35 L 40 25 Z" fill="none" stroke="#ff4500" stroke-width="1"
+                        opacity="0.3" />
+                </svg>
+            </div>
+            <h3>Suporte Completo</h3>
+            <p>Integração de sistemas, manutenção contínua e arquitetura escalável para
+                garantir que seu projeto cresça junto com seu negócio sem preocupações.</p>
+        </div>
+    </section>
+
+    <section class="portfolio" id="portfolio">
+        <div class="section-header">
+            <div class="v-icon">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#ff4500" stroke-width="2" opacity="0.4" />
+                    <line x1="20" y1="25" x2="35" y2="50" stroke="#ff4500" stroke-width="5" stroke-linecap="round" />
+                    <line x1="35" y1="50" x2="50" y2="75" stroke="#ff4500" stroke-width="6" stroke-linecap="round" />
+                    <line x1="80" y1="25" x2="65" y2="50" stroke="#ff4500" stroke-width="5" stroke-linecap="round" />
+                    <line x1="65" y1="50" x2="50" y2="75" stroke="#ff4500" stroke-width="6" stroke-linecap="round" />
+                    <circle cx="20" cy="25" r="4" fill="#ff4500">
+                        <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="35" cy="50" r="3.5" fill="#ff4500">
+                        <animate attributeName="opacity" values="1;0.5;1" dur="2s" begin="0.5s"
+                            repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="80" cy="25" r="4" fill="#ff4500">
+                        <animate attributeName="opacity" values="1;0.5;1" dur="2s" begin="0.3s"
+                            repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="65" cy="50" r="3.5" fill="#ff4500">
+                        <animate attributeName="opacity" values="1;0.5;1" dur="2s" begin="0.8s"
+                            repeatCount="indefinite" />
+                    </circle>
+                    <circle cx="50" cy="75" r="5" fill="#ff4500">
+                        <animate attributeName="opacity" values="1;0.5;1" dur="2s" begin="1s"
+                            repeatCount="indefinite" />
+                    </circle>
+                </svg>
+            </div>
+            <h2>PORTFOLIO</h2>
+            <p>Projetos que definem o futuro digital</p>
+        </div>
+
+        <div class="portfolio-grid">
+            <a href="./portifolio/nexus/index.html" class="portfolio-item">
+                <div class="portfolio-image nexus">
+                    <!-- <img class="" src="nexus_fit.png" alt=""> -->
+                </div>
+                <div class="portfolio-content">
+                    <h3>NexusFit</h3>
+                    <!-- <div class="tech-stack">
+                        <span class="tech-tag">React</span>
+                        <span class="tech-tag">Node.js</span>
+                        <span class="tech-tag">AWS</span>
+                    </div> -->
+                    <p>Site institucional para academia com calculador de IMC</p>
+                </div>
+            </a>
+
+            <a href="portifolio/verdevivo/index.html" class="portfolio-item">
+                <div class="portfolio-image verdevido">
+                </div>
+                <div class="portfolio-content">
+                    <h3>Verde Vivo</h3>
+                    <!-- <div class="tech-stack">
+                        <span class="tech-tag">Python</span>
+                        <span class="tech-tag">TensorFlow</span>
+                        <span class="tech-tag">BigQuery</span>
+                    </div> -->
+                    <p>Site institucional para quem oferece serviços de Jardinagem e Paisagismo</p>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Fale Conosco Section -->
+    <section class="contact-section" id="contact">
+        <div class="section-header">
+            <div class="v-icon">
+                <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Base Circle (Matching Portfolio Style) -->
+                    <circle cx="50" cy="50" r="45" fill="none" stroke="#ff4500" stroke-width="2" opacity="0.4" />
+
+                    <!-- Simplified Envelope Icon -->
+                    <g transform="translate(25, 30) scale(1)">
+                        <!-- Envelope Outline -->
+                        <rect x="0" y="0" width="50" height="35" rx="3" fill="none" stroke="#ff4500" stroke-width="3" />
+                        <!-- Envelope Flap -->
+                        <polyline points="0,0 25,20 50,0" fill="none" stroke="#ff4500" stroke-width="3"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </g>
+
+                    <!-- Subtle Pulse Animation on Flap -->
+                    <circle cx="50" cy="50" r="48" fill="none" stroke="#ff4500" stroke-width="1" opacity="0">
+                        <animate attributeName="r" values="45;55" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0;0.3;0" dur="3s" repeatCount="indefinite" />
+                    </circle>
+                </svg>
+            </div>
+            <h2>CONTATO</h2>
+            <p>Conecte-se com o futuro</p>
+        </div>
+
+        <div class="contact-container">
+            <form id="contact-form" action="contact.php" method="POST" class="contact-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <input type="text" id="name" name="name" required placeholder=" ">
+                        <label for="name">Nome</label>
+                        <div class="input-line"></div>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" required placeholder=" ">
+                        <label for="email">Email</label>
+                        <div class="input-line"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="subject" name="subject" required placeholder=" ">
+                    <label for="subject">Assunto</label>
+                    <div class="input-line"></div>
+                </div>
+                <div class="form-group">
+                    <textarea id="message" name="message" required placeholder=" " rows="5"></textarea>
+                    <label for="message">Mensagem</label>
+                    <div class="input-line"></div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span class="btn-text">ENVIAR TRANSMISSÃO</span>
+                    <div class="btn-glitch"></div>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-grid-bg"></div>
+        <div class="footer-grid">
+            <div class="footer-column">
+                <h4>Contato</h4>
+                <ul class="footer-links">
+                    <li><a href="vijales2000@gmail.com">vijales2000@gmail.com</a></li>
+                    <li><a href="https://wa.me/5548998699159">+55 48 99869-9159</a></li>
+                </ul>
+                <div class="footer-social">
+                    <a href="#" class="social-icon"><span>f</span></a>
+                    <a href="#" class="social-icon"><span>in</span></a>
+                    <a href="#" class="social-icon"><span>tw</span></a>
+                    <a href="#" class="social-icon"><span>gh</span></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-logo">
+                <div class="footer-logo-v">
+                    <svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                        <line x1="10" y1="15" x2="20" y2="30" stroke="#ff4500" stroke-width="3"
+                            stroke-linecap="round" />
+                        <line x1="20" y1="30" x2="30" y2="45" stroke="#ff4500" stroke-width="4"
+                            stroke-linecap="round" />
+                        <line x1="50" y1="15" x2="40" y2="30" stroke="#ff4500" stroke-width="3"
+                            stroke-linecap="round" />
+                        <line x1="40" y1="30" x2="30" y2="45" stroke="#ff4500" stroke-width="4"
+                            stroke-linecap="round" />
+                        <circle cx="30" cy="45" r="3.5" fill="#ff4500" />
+                    </svg>
+                </div>
+                <div class="footer-logo-text">VIJALES</div>
+            </div>
+            <div class="footer-copyright">
+                © 2025 Vijales. The Future is Now.
+            </div>
+        </div>
+    </footer>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="contact-handler.js"></script>
+    <script>
+        let scene, camera, renderer, particles, lines, vShape;
+        let gridRunners = []; // Array for multiple runners
+        let mouseX = 0, mouseY = 0;
+        let targetRotationX = 0, targetRotationY = 0;
+
+        // Scroll interaction variables
+        let scrollY = 0;
+        let targetScrollY = 0;
+        let scrollSpeed = 0;
+        let lastScrollTime = 0;
+
+        function init() {
+            // Cena
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x000000, 0.0025);
+
+            // Câmera
+            camera = new THREE.PerspectiveCamera(
+                75,
+                window.innerWidth / window.innerHeight,
+                0.1,
+                1000
+            );
+            // Initial position will be updated by scroll
+            camera.position.z = 50;
+            camera.position.y = 10;
+
+            // Renderer
+            const container = document.getElementById('canvas-container');
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Criar partículas
+            //createParticles();
+
+            // Criar linhas de grid
+            createGrid();
+
+            // Criar Grid Runners (Tron Data Dashes)
+            // Increased count slightly for better effect
+            const runnerCount = 20;
+            for (let i = 0; i < runnerCount; i++) {
+                // Random start Z to spread them out
+                const startZ = -100 - Math.random() * 500;
+                gridRunners.push(new GridRunner(scene, -30, 50, startZ));
+            }
+
+            // Listeners
+            window.addEventListener('resize', onWindowResize);
+            document.addEventListener('mousemove', onMouseMove);
+
+            // Scroll Listener
+            window.addEventListener('scroll', () => {
+                targetScrollY = window.scrollY;
+                const now = Date.now();
+                const dt = now - lastScrollTime;
+                if (dt > 0) {
+                    scrollSpeed = (targetScrollY - scrollY) / dt;
+                }
+                lastScrollTime = now;
+            });
+
+            // Esconder loading
+            setTimeout(() => {
+                document.querySelector('.loading').classList.add('hide');
+            }, 1500);
+
+            // Animação
+            animate();
+
+            // Initial update for scroll
+            updateSectionVisibility();
+        }
+
+        function createParticles() {
+            const geometry = new THREE.BufferGeometry();
+            const vertices = [];
+            const colors = [];
+
+            for (let i = 0; i < 1500; i++) { // Increased particle count
+                const x = (Math.random() - 0.5) * 600;
+                const y = (Math.random() - 0.5) * 400; // Taller spread
+                const z = (Math.random() - 0.5) * 1000; // Deeper spread
+                vertices.push(x, y, z);
+
+                // Cores variando entre laranja e vermelho
+                const color = new THREE.Color();
+                color.setHSL(Math.random() * 0.1, 1.0, 0.5);
+                colors.push(color.r, color.g, color.b);
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.5,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending
+            });
+
+            particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+        }
+
+        function createGrid() {
+            const gridHelper = new THREE.GridHelper(5000, 100, 0xff4500, 0xff4500);
+            gridHelper.material.transparent = true;
+            gridHelper.material.opacity = 0.15; // Slightly reduced for better text readability
+            gridHelper.position.y = -30;
+            scene.add(gridHelper);
+        }
+
+        function onMouseMove(event) {
+            mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function updateSectionVisibility() {
+            // Logic for Full Page Snap Visibility
+            const sections = document.querySelectorAll('section');
+            const viewportHeight = window.innerHeight;
+
+            sections.forEach((section, index) => {
+                const rect = section.getBoundingClientRect();
+
+                // Expanding the "focus" area nicely so items don't disappear just because they are slightly off-center
+                // Focus zone: If the center of the section is within the middle 50% of the viewport.
+                const sectionCenter = rect.top + rect.height / 2;
+                const isFocused = (sectionCenter > viewportHeight * 0.3 && sectionCenter < viewportHeight * 0.7);
+
+                if (isFocused) {
+                    section.classList.add('active');
+                    section.style.pointerEvents = 'all';
+                } else {
+                    section.classList.remove('active');
+                    section.style.pointerEvents = 'none'; // Prevent interaction with hidden sections
+                }
+
+                // Reset manual styles that might conflict with class
+                section.style.opacity = '';
+                section.style.transform = '';
+                section.style.filter = '';
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            scrollY += (targetScrollY - scrollY) * 0.1; // Smooth scroll inertia
+
+            // Update Section Visibility
+            updateSectionVisibility();
+
+            // Rotação suave das partículas
+            if (particles) {
+                particles.rotation.y += 0.005;
+                // Move particles based on scroll speed (Warp effect)
+                // When scrolling down, particles move towards camera (z increases)
+                // particles.position.z += scrollSpeed * 2.0;
+                // if (particles.position.z > 500) particles.position.z -= 1000;
+                // if (particles.position.z < -500) particles.position.z += 1000;
+            }
+
+            // Update all runners
+            // Warp speed for runners too
+            gridRunners.forEach(runner => runner.update());
+            // const extraSpeed = Math.abs(scrollSpeed) * 5;
+            // gridRunners.forEach(runner => runner.update(extraSpeed));
+
+            // Camera movement tied to scroll
+            // As we scroll down (scrollY increases), camera moves forward (Z decreases) and slightly down/up
+            const camScrollZ = scrollY * 0.05;
+            camera.position.z = 50 - camScrollZ;
+
+            // Mouse Parallax
+            camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY * 2 + 10 - camera.position.y) * 0.05; // Base Y is 10
+
+            camera.lookAt(0, 0, camera.position.z - 100); // Always look forward
+
+            renderer.render(scene, camera);
+
+            // Decay scroll speed
+            scrollSpeed *= 0.95;
+            if (Math.abs(scrollSpeed) < 0.01) scrollSpeed = 0;
+        }
+
+        class GridRunner {
+            constructor(scene, yLevel, gridSize, startZ) {
+                this.scene = scene;
+                this.yLevel = yLevel + 0.15;
+                this.gridSize = gridSize;
+                this.baseSpeed = 3.0;
+                this.speed = this.baseSpeed;
+
+                // Visuals - Line Trail
+                this.maxPathLength = 20; // Length of the trail (segments)
+                const geometry = new THREE.BufferGeometry();
+
+                const positions = new Float32Array(this.maxPathLength * 3);
+                const colors = new Float32Array(this.maxPathLength * 3);
+
+                geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+                // Material with Vertex Colors
+                const material = new THREE.LineBasicMaterial({
+                    color: 0xffffff,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 1.0,
+                    linewidth: 1,
+                    blending: THREE.AdditiveBlending
+                });
+
+                this.line = new THREE.Line(geometry, material);
+                this.line.frustumCulled = false;
+                this.scene.add(this.line);
+
+                // Initialize State
+                this.pathHistory = [];
+                this.respawn(startZ);
+            }
+
+            respawn(forceZ) {
+                const startX = Math.floor((Math.random() - 0.5) * 20) * this.gridSize;
+                const z = forceZ !== undefined ? forceZ : 100;
+
+                this.currentPos = new THREE.Vector3(startX, this.yLevel, z);
+                this.targetPos = this.currentPos.clone();
+                this.isMoving = false;
+
+                // Clear and seed path history
+                this.pathHistory = [];
+                for (let i = 0; i < this.maxPathLength; i++) {
+                    this.pathHistory.push(this.currentPos.clone());
+                }
+
+                this.pickNextTarget();
+            }
+
+            update(extraSpeed = 0) {
+                if (!this.isMoving) {
+                    this.pickNextTarget();
+                }
+
+                let currentSpeed = this.speed + extraSpeed;
+
+                // Move towards target
+                const direction = new THREE.Vector3().subVectors(this.targetPos, this.currentPos);
+                const dist = direction.length();
+
+                if (dist < currentSpeed) {
+                    this.currentPos.copy(this.targetPos);
+                    this.isMoving = false;
+
+                    // Expanded bounds for infinite scrolling illusion
+                    if (this.currentPos.z < camera.position.z - 500) {
+                        this.respawn(camera.position.z + 200);
+                    }
+                    if (this.currentPos.z > camera.position.z + 500) {
+                        this.respawn(camera.position.z - 500);
+                    }
+                } else {
+                    direction.normalize().multiplyScalar(currentSpeed);
+                    this.currentPos.add(direction);
+                    this.isMoving = true;
+                }
+
+                this.pathHistory.unshift(this.currentPos.clone());
+                if (this.pathHistory.length > this.maxPathLength) {
+                    this.pathHistory.pop();
+                }
+
+                this.updateGeometry();
+            }
+
+            updateGeometry() {
+                const positions = this.line.geometry.attributes.position.array;
+                const colors = this.line.geometry.attributes.color.array;
+
+                const pathLen = this.pathHistory.length;
+
+                for (let i = 0; i < this.maxPathLength; i++) {
+                    if (i < pathLen) {
+                        const p = this.pathHistory[i];
+                        positions[i * 3] = p.x;
+                        positions[i * 3 + 1] = p.y;
+                        positions[i * 3 + 2] = p.z;
+
+                        const alpha = Math.max(0, 1.0 - (i / this.maxPathLength));
+
+                        colors[i * 3] = 0.0 * alpha; // R
+                        colors[i * 3 + 1] = 0.784 * alpha; // G
+                        colors[i * 3 + 2] = 1.0 * alpha; // B
+                    } else {
+                        const p = this.pathHistory[pathLen - 1] || this.currentPos;
+                        positions[i * 3] = p.x;
+                        positions[i * 3 + 1] = p.y;
+                        positions[i * 3 + 2] = p.z;
+                        colors[i * 3] = 0; colors[i * 3 + 1] = 0; colors[i * 3 + 2] = 0;
+                    }
+                }
+
+                this.line.geometry.attributes.position.needsUpdate = true;
+                this.line.geometry.attributes.color.needsUpdate = true;
+            }
+
+            pickNextTarget() {
+                const directions = [];
+                // Forward bias
+                directions.push(new THREE.Vector3(0, 0, -this.gridSize));
+                directions.push(new THREE.Vector3(0, 0, -this.gridSize));
+
+                // Also allow backward movement occasionally for variety if desired, 
+                // but for Tron runners usually forward is best.
+                // Let's keep them moving "with" the flow mostly
+
+                // Sideways
+                directions.push(new THREE.Vector3(this.gridSize, 0, 0));
+                directions.push(new THREE.Vector3(-this.gridSize, 0, 0));
+
+                const nextDir = directions[Math.floor(Math.random() * directions.length)];
+                this.targetPos.copy(this.currentPos).add(nextDir);
+
+                // Bounds relative to center X
+                if (Math.abs(this.targetPos.x) > 500) {
+                    this.targetPos.x = this.currentPos.x;
+                    this.targetPos.z -= this.gridSize;
+                }
+                this.isMoving = true;
+            }
+        }
+
+        // Inicializar quando carregar
+        window.addEventListener('load', init);
+
+        // Botão CTA
+        document.querySelector('.cta-button').addEventListener('click', function () {
+            this.style.transform = 'translateY(-5px) scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'translateY(-5px)';
+            }, 150);
+        });
+    </script>
+    <script src="script-animate.js"></script>
+</body>
+
+</html>
