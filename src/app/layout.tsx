@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import { Orbitron } from "next/font/google";
-import "./globals.css"; // Keeping default nextjs globals for now, might remove later if conflicting with GlobalStyles
+import "./globals.css";
 import StyledComponentsRegistry from "@/lib/registry";
 import GlobalStyles from "@/styles/GlobalStyles";
+
+// Components
+import Navbar from "@/components/layout/Navbar";
+// Sidebar moved to page.tsx
+import Footer from "@/components/layout/Footer";
+import BackgroundEffects from "@/components/effects/BackgroundEffects";
+import ThreeBackground from "@/components/effects/ThreeBackground";
 
 const orbitron = Orbitron({
   variable: "--font-orbitron",
@@ -25,7 +32,18 @@ export default function RootLayout({
       <body className={`${orbitron.variable} ${orbitron.className}`}>
         <StyledComponentsRegistry>
           <GlobalStyles />
-          {children}
+
+
+          <BackgroundEffects />
+          <ThreeBackground />
+          {/* Sidebar moved to page.tsx for specific scroll control */}
+
+          <Navbar />
+          <main style={{ position: 'relative', zIndex: 2 }}>
+            {children}
+          </main>
+          <Footer />
+
         </StyledComponentsRegistry>
       </body>
     </html>

@@ -76,10 +76,75 @@ const GlobalStyles = createGlobalStyle`
     scroll-margin-block: 5ex;
   }
 
-  /* Custom Selection Color */
-  ::selection {
-    background: #ff4500;
-    color: #fff;
+  /* Section Defaults */
+  section {
+    padding: 80px 10% 0 10%;
+    box-sizing: border-box;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.5s ease-out;
+    will-change: opacity, transform;
+
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+
+    position: relative;
+    z-index: 2;
+  }
+
+  section.active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-height: 700px) {
+    section {
+      justify-content: flex-start;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-30px) rotate(5deg);
+    }
+  }
+
+  @keyframes glitchText {
+    0%, 94%, 100% {
+      transform: translate(0);
+      opacity: 0;
+    }
+    95% {
+      transform: translate(4px, -4px);
+      opacity: 0.5;
+    }
+    96% {
+      transform: translate(-4px, 4px);
+      opacity: 0.5;
+    }
+    97% {
+      transform: translate(2px, -2px);
+      opacity: 0.5;
+    }
   }
 `
 
