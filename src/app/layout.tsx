@@ -38,7 +38,7 @@ export default function RootLayout({
           <ThreeBackground />
           {/* Sidebar moved to page.tsx for specific scroll control */}
 
-          <Navbar />
+          {/* <Navbar /> */}
           <main style={{ position: 'relative', zIndex: 2 }}>
             {children}
           </main>

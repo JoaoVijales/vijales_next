@@ -12,6 +12,9 @@ const GlobalStyles = createGlobalStyle`
     -moz-text-size-adjust: none;
     -webkit-text-size-adjust: none;
     text-size-adjust: none;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
   }
 
   body, h1, h2, h3, h4, p, figure, blockquote, dl, dd {
@@ -23,20 +26,17 @@ const GlobalStyles = createGlobalStyle`
   }
 
   body {
+    height: 100%;
     min-height: 100vh;
     line-height: 1.5;
     margin: 0;
     padding: 0;
     width: 100%;
-    overflow-x: hidden;
-    overflow-y: scroll;
+    overflow: hidden; /* Disable native window scroll */
+    position: fixed; /* Hard lock to prevents any drifting */
+    overscroll-behavior: none;
     background-color: #000;
     color: #fff;
-    scroll-behavior: smooth;
-    
-    /* Scroll Snap Config */
-    scroll-snap-type: y mandatory;
-    scroll-padding-top: 80px; /* Offset for sticky nav */
     scrollbar-width: none; /* Firefox */
   }
 
@@ -90,8 +90,6 @@ const GlobalStyles = createGlobalStyle`
     display: flex;
     flex-direction: column;
     justify-content: center;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
 
     position: relative;
     z-index: 2;

@@ -229,15 +229,7 @@ export default function ThreeBackground() {
             mouseY = -(event.clientY / window.innerHeight) * 2 + 1
         }
 
-        const onScroll = () => {
-            targetScrollY = window.scrollY
-            const now = Date.now()
-            const dt = now - lastScrollTime
-            if (dt > 0) {
-                scrollSpeed = (targetScrollY - scrollY) / dt
-            }
-            lastScrollTime = now
-        }
+        // onScroll removed as native window scroll is disabled
 
         const animate = () => {
             animationFrameId = requestAnimationFrame(animate)
@@ -297,7 +289,6 @@ export default function ThreeBackground() {
 
             // Listeners
             window.addEventListener('resize', onWindowResize)
-            window.addEventListener('scroll', onScroll)
             document.addEventListener('mousemove', onMouseMove)
 
             // Start Loop
@@ -311,7 +302,6 @@ export default function ThreeBackground() {
         return () => {
             cancelAnimationFrame(animationFrameId)
             window.removeEventListener('resize', onWindowResize)
-            window.removeEventListener('scroll', onScroll)
             document.removeEventListener('mousemove', onMouseMove)
 
             if (renderer) {

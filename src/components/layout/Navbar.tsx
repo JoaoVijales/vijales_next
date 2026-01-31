@@ -216,10 +216,10 @@ export default function Navbar() {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
     } else {
-      document.body.style.overflow = ''
+      document.body.style.overflow = 'hidden' // Keep it locked
     }
     return () => {
-      document.body.style.overflow = ''
+      document.body.style.overflow = 'hidden'
     }
   }, [isOpen])
 
