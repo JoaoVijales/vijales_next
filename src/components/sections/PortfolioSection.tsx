@@ -11,11 +11,20 @@ const PortfolioWrapper = styled.section`
   padding-left: 5%;
   max-width: 1600px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
 `;
 
 const SectionHeader = styled.div`
   text-align: center;
   margin-bottom: 6rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 2.5rem;
+  }
 
   .v-icon {
     width: 80px;
@@ -23,6 +32,12 @@ const SectionHeader = styled.div`
     margin: 0 auto 2rem;
     filter: drop-shadow(0 0 20px rgba(255, 69, 0, 0.8));
     
+    @media (max-width: 768px) {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 1rem;
+    }
+
     svg {
       width: 100%;
       height: 100%;
@@ -37,6 +52,11 @@ const SectionHeader = styled.div`
     letter-spacing: 15px;
     margin-bottom: 1rem;
     text-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+      letter-spacing: 8px;
+    }
   }
 
   p {
@@ -53,8 +73,13 @@ const Grid = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
   gap: 4rem;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     padding-inline: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
@@ -100,10 +125,18 @@ const ItemImage = styled.div<{ $bg: string }>`
   display: flex;
   align-items: center;
   justify-content: center;
+
+  @media (max-width: 768px) {
+    height: 160px;
+  }
 `;
 
 const ItemContent = styled.div`
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1.2rem;
+  }
 
   h3 {
     font-size: 1rem;
@@ -112,6 +145,11 @@ const ItemContent = styled.div`
     letter-spacing: 3px;
     margin-bottom: 1rem;
     font-weight: 700;
+
+    @media (max-width: 768px) {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
   }
 
   p {
@@ -119,6 +157,11 @@ const ItemContent = styled.div`
     line-height: 1.8;
     font-size: 0.95rem;
     font-weight: 300;
+
+    @media (max-width: 768px) {
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
   }
 `;
 

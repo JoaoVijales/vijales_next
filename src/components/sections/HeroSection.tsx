@@ -17,6 +17,16 @@ const TronLogo = styled.div`
   animation: float 8s ease-in-out infinite;
   filter: drop-shadow(0 0 40px rgba(255, 69, 0, 0.9));
 
+  @media (max-width: 768px) {
+    width: 150px;
+    height: 150px;
+  }
+
+  @media (max-height: 700px) {
+    width: 120px;
+    height: 120px;
+  }
+
   svg {
     width: 100%;
     height: 100%;
@@ -69,6 +79,15 @@ const Subtitle = styled.p`
   letter-spacing: 1px;
   opacity: 0;
   animation: fadeInUp 1s ease-out 1.1s forwards;
+
+  @media (max-width: 768px) {
+    margin-bottom: 2rem;
+    padding-inline: 1.5rem;
+  }
+
+  @media (max-height: 700px) {
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const CtaButton = styled.a`

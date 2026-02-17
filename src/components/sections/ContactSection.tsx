@@ -7,11 +7,19 @@ const ContactWrapper = styled.section`
   padding: 4rem 5%;
   position: relative;
   z-index: 10;
+
+  @media (max-width: 768px) {
+    padding: 2rem 5%;
+  }
 `;
 
 const SectionHeader = styled.div`
   text-align: center;
   margin-bottom: 3rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 1.5rem;
+  }
 
   .v-icon {
     width: 80px;
@@ -19,6 +27,12 @@ const SectionHeader = styled.div`
     margin: 0 auto 2rem;
     filter: drop-shadow(0 0 20px rgba(255, 69, 0, 0.8));
     
+    @media (max-width: 768px) {
+      width: 60px;
+      height: 60px;
+      margin-bottom: 1rem;
+    }
+
     svg {
       width: 100%;
       height: 100%;
@@ -33,6 +47,11 @@ const SectionHeader = styled.div`
     letter-spacing: 15px;
     margin-bottom: 1rem;
     text-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+      letter-spacing: 8px;
+    }
   }
 
   p {
@@ -55,6 +74,11 @@ const Container = styled.div`
   filter: drop-shadow(0 0 25px rgba(0, 0, 0, 0.9));
   position: relative;
   clip-path: polygon(40px 0, 100% 0, 100% calc(100% - 40px), calc(100% - 40px) 100%, 0 100%, 0 40px);
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+  }
 
   &::after {
     content: '';
@@ -85,6 +109,10 @@ const Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 2.5rem;
+
+  @media (max-width: 768px) {
+    gap: 1.5rem;
+  }
 `;
 
 const FormRow = styled.div`

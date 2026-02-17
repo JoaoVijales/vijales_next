@@ -20,7 +20,7 @@ const ServicesWrapper = styled.section`
   display: grid !important;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
-  max-height: 100vh;
+  min-height: 100vh;
   max-width: 1600px;
   margin: 0 auto;
   
@@ -28,12 +28,27 @@ const ServicesWrapper = styled.section`
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(5px);
   border-radius: 20px;
+
+  @media (max-width: 768px) {
+    padding: 2rem 5%;
+    gap: 1rem;
+    overflow-y: auto;
+  }
+
+  @media (max-height: 700px) {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
 `;
 
 const SectionHeader = styled.div`
   grid-column: 1 / -1;
   text-align: center;
   margin-bottom: 3rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 1.5rem;
+  }
   
   h2 {
     font-size: 2rem;
@@ -43,6 +58,11 @@ const SectionHeader = styled.div`
     letter-spacing: 15px;
     margin-bottom: 1rem;
     text-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+      letter-spacing: 8px;
+    }
   }
 `;
 
@@ -57,6 +77,11 @@ const Card = styled.div<{ $isVisible?: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    gap: 0.5rem;
+  }
   
   /* Initial state for animation */
   opacity: 0; 
@@ -65,13 +90,6 @@ const Card = styled.div<{ $isVisible?: boolean }>`
   ${props => props.$isVisible && css`
     animation: ${flipIn} 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   `}
-
-  /* Stagger delays based on child index is tricky with styled-components isolation,
-     so we can handle it via props or just generic nth-child in the wrapper if we wanted.
-     For now, let's keep it simple or use a delay prop if needed.
-     Actually, let's add a small random or index based delay if we can, but 
-     prop drilling index is easy.
-  */
   
   &::before {
     content: '';
@@ -117,6 +135,11 @@ const Card = styled.div<{ $isVisible?: boolean }>`
     position: relative;
     display: inline-block;
 
+    @media (max-width: 768px) {
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+    }
+
     &::after {
       content: '';
       position: absolute;
@@ -136,6 +159,11 @@ const Card = styled.div<{ $isVisible?: boolean }>`
     font-weight: 300;
     letter-spacing: 0.5px;
     margin-top: 1rem;
+
+    @media (max-width: 768px) {
+      margin-top: 0.5rem;
+      line-height: 1.6;
+    }
   }
 `;
 
@@ -143,6 +171,11 @@ const IconWrapper = styled.div`
   width: 4rem;
   height: 4rem;
   margin-bottom: 0;
+
+  @media (max-width: 768px) {
+    width: 3rem;
+    height: 3rem;
+  }
   
   svg {
     width: 100%;
