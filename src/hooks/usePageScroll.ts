@@ -8,7 +8,7 @@ export function usePageScroll(sectionCount: number) {
 
     // Sensitivity controls
     const scrollAccumulator = useRef(0);
-    const SCROLL_THRESHOLD = 250; // Points of deltaY to accumulate before trigger
+    const SCROLL_THRESHOLD = 275; // Points of deltaY to accumulate before trigger
     const touchStartY = useRef<number | null>(null);
 
     // Helper to get current section element
@@ -41,7 +41,7 @@ export function usePageScroll(sectionCount: number) {
         // We must ensure we don't break the 'translate' logic.
         // Page.tsx uses: translate3d(0,0,0) rotateX(0deg) for offset 0.
         // So overwriting it here is safe IF offset is 0.
-        el.style.transform = `translate3d(0, 0, 0) rotateX(${tilt}deg)`;
+        el.style.transform = `translate3d(0, 0, 0) rotateX(${tilt * 3}deg)`;
     };
 
     const resetTilt = () => {
@@ -154,7 +154,7 @@ export function usePageScroll(sectionCount: number) {
         const touchY = event.touches[0].clientY;
         const deltaY = touchStartY.current - touchY;
 
-        const shouldPrevent = processMovement(deltaY * 1.5);
+        const shouldPrevent = processMovement(deltaY * 2.5);
         if (shouldPrevent) event.preventDefault();
 
         touchStartY.current = touchY;
