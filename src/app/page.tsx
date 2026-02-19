@@ -56,6 +56,36 @@ const SectionWrapper = styled.div<{ $offset: number }>`
   &::-webkit-scrollbar {
     display: none;
   }
+
+  /* Target internal sections for specific home behavior */
+  section {
+    padding: 80px 10% 0 10%;
+    box-sizing: border-box;
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    
+    /* Animation base */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.5s ease-out;
+    will-change: opacity, transform;
+
+    &.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-height: 700px) {
+    section {
+      justify-content: flex-start;
+    }
+  }
 `;
 
 export default function Home() {

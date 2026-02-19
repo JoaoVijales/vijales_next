@@ -237,7 +237,7 @@ export default function ThreeBackground() {
             scrollY += (targetScrollY - scrollY) * 0.1
 
             if (particles) {
-                particles.rotation.y += 0.005
+                //particles.rotation.y += 0.005
             }
 
             gridRunners.forEach(runner => runner.update())

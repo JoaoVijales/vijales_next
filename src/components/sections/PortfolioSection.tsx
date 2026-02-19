@@ -230,13 +230,13 @@ export default function PortfolioSection({ isActive = false }: PortfolioSectionP
           title="NexusFit"
           description="Site institucional para academia com calculador de IMC"
           image="/portifolio/nexus_fit.png"
-          link="#"
+          link="/portifolio/nexus"
         />
         <PortfolioItem
           title="Verde Vivo"
           description="Site institucional para quem oferece serviços de Jardinagem e Paisagismo"
           image="/portifolio/verdevivo.png"
-          link="#"
+          link="/portifolio/verdevivo"
         />
       </Grid>
     </PortfolioWrapper>

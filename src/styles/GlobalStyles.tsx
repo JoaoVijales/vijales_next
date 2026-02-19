@@ -1,8 +1,9 @@
 'use client'
 
 import { createGlobalStyle } from 'styled-components'
+import { usePathname } from 'next/navigation'
 
-const GlobalStyles = createGlobalStyle`
+const StyledGlobalStyles = createGlobalStyle<{ $isHome: boolean }>`
   /* Reset css */
   *, *::before, *::after {
     box-sizing: border-box;
@@ -13,8 +14,8 @@ const GlobalStyles = createGlobalStyle`
     -webkit-text-size-adjust: none;
     text-size-adjust: none;
     height: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
+    overflow: ${props => props.$isHome ? 'hidden' : 'auto'};
+    overscroll-behavior: ${props => props.$isHome ? 'none' : 'auto'};
   }
 
   body, h1, h2, h3, h4, p, figure, blockquote, dl, dd {
@@ -32,15 +33,14 @@ const GlobalStyles = createGlobalStyle`
     margin: 0;
     padding: 0;
     width: 100%;
-    overflow: hidden; /* Disable native window scroll */
-    position: fixed; /* Hard lock to prevents any drifting */
-    overscroll-behavior: none;
+    overflow: ${props => props.$isHome ? 'hidden' : 'auto'};
+    position: ${props => props.$isHome ? 'fixed' : 'static'};
+    overscroll-behavior: ${props => props.$isHome ? 'none' : 'auto'};
     background-color: #000;
     color: #fff;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: ${props => props.$isHome ? 'none' : 'auto'};
   }
 
-  /* Hide scrollbar for Chrome, Safari and Opera */
   body::-webkit-scrollbar {
     display: none;
   }
@@ -74,36 +74,6 @@ const GlobalStyles = createGlobalStyle`
 
   :target {
     scroll-margin-block: 5ex;
-  }
-
-  /* Section Defaults */
-  section {
-    padding: 80px 10% 0 10%;
-    box-sizing: border-box;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.5s ease-out;
-    will-change: opacity, transform;
-
-    min-height: 100vh;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    position: relative;
-    z-index: 2;
-  }
-
-  section.active {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  @media (max-height: 700px) {
-    section {
-      justify-content: flex-start;
-    }
   }
 
   @keyframes fadeInUp {
@@ -146,4 +116,8 @@ const GlobalStyles = createGlobalStyle`
   }
 `
 
-export default GlobalStyles
+export default function GlobalStyles() {
+  const pathname = usePathname()
+  const isHome = pathname === '/'
+  return <StyledGlobalStyles $isHome={isHome} />
+}

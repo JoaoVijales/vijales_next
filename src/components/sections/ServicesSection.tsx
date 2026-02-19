@@ -16,12 +16,15 @@ const flipIn = keyframes`
 `;
 
 const ServicesWrapper = styled.section`
-  padding: 4rem 15%;
+  padding: 4rem 10%;
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  justify-content: center;
+  align-content: center;
+  gap: 2rem;
   min-height: 100vh;
-  max-width: 1600px;
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
   
   /* Improve visibility against moving background */
