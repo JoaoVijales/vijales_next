@@ -96,25 +96,7 @@ const StyledGlobalStyles = createGlobalStyle<{ $isHome: boolean }>`
     }
   }
 
-  @keyframes glitchText {
-    0%, 94%, 100% {
-      transform: translate(0);
-      opacity: 0;
-    }
-    95% {
-      transform: translate(4px, -4px);
-      opacity: 0.5;
-    }
-    96% {
-      transform: translate(-4px, 4px);
-      opacity: 0.5;
-    }
-    97% {
-      transform: translate(2px, -2px);
-      opacity: 0.5;
-    }
-  }
-`
+}`
 
 export default function GlobalStyles() {
   const pathname = usePathname()

@@ -1,8 +1,27 @@
 'use client'
 
 import React, { useRef } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { useSVGAnimate } from '@/hooks/useSVGAnimate'
+
+const glitchText = keyframes`
+  0%, 94%, 100% {
+    transform: translate(0);
+    opacity: 0;
+  }
+  95% {
+    transform: translate(4px, -4px);
+    opacity: 0.5;
+  }
+  96% {
+    transform: translate(-4px, 4px);
+    opacity: 0.5;
+  }
+  97% {
+    transform: translate(2px, -2px);
+    opacity: 0.5;
+  }
+`
 
 const HeroWrapper = styled.section`
   text-align: center;
@@ -65,7 +84,7 @@ const Title = styled.h1`
     width: 100%;
     color: #ff4500;
     z-index: -1;
-    animation: glitchText 5s infinite;
+    animation: ${glitchText} 5s infinite;
   }
 `;
 
@@ -150,7 +169,6 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ isActive = false }: HeroSectionProps) {
-  // const [ref, isVisible] = useIntersectionObserver(...) -> Replaced by isActive prop
   const svgRef = useRef<SVGSVGElement>(null)
 
   useSVGAnimate(svgRef, isActive)

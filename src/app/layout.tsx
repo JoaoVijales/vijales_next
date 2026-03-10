@@ -5,7 +5,6 @@ import StyledComponentsRegistry from "@/lib/registry";
 import GlobalStyles from "@/styles/GlobalStyles";
 
 // Components
-import Navbar from "@/components/layout/Navbar";
 // Sidebar moved to page.tsx
 import Footer from "@/components/layout/Footer";
 import BackgroundEffects from "@/components/effects/BackgroundEffects";
@@ -58,8 +57,6 @@ export default function RootLayout({
           <BackgroundEffects />
           <ThreeBackground />
           {/* Sidebar moved to page.tsx for specific scroll control */}
-
-          {/* <Navbar /> */}
           <main style={{ position: 'relative', zIndex: 2 }}>
             {children}
           </main>
