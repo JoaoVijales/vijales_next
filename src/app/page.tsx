@@ -1,6 +1,7 @@
 
 'use client'
 
+import { useCallback } from 'react'
 import styled from 'styled-components'
 import { usePageScroll } from '@/hooks/usePageScroll'
 import Sidebar from '@/components/layout/Sidebar'
@@ -92,35 +93,28 @@ export default function Home() {
   const SECTION_COUNT = 4;
   const { activeSection, setActiveSection, containerRef, sectionRefs } = usePageScroll(SECTION_COUNT);
 
+  const setRef0 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[0] = el }, [sectionRefs])
+  const setRef1 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[1] = el }, [sectionRefs])
+  const setRef2 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[2] = el }, [sectionRefs])
+  const setRef3 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[3] = el }, [sectionRefs])
+
   return (
     <MainWrapper ref={containerRef}>
       <Sidebar activeIndex={activeSection} onNavigate={setActiveSection} />
 
-      <SectionWrapper
-        $offset={0 - activeSection}
-        ref={el => { sectionRefs.current[0] = el }}
-      >
+      <SectionWrapper $offset={0 - activeSection} ref={setRef0}>
         <HeroSection isActive={activeSection === 0} />
       </SectionWrapper>
 
-      <SectionWrapper
-        $offset={1 - activeSection}
-        ref={el => { sectionRefs.current[1] = el }}
-      >
+      <SectionWrapper $offset={1 - activeSection} ref={setRef1}>
         <ServicesSection isActive={activeSection === 1} />
       </SectionWrapper>
 
-      <SectionWrapper
-        $offset={2 - activeSection}
-        ref={el => { sectionRefs.current[2] = el }}
-      >
+      <SectionWrapper $offset={2 - activeSection} ref={setRef2}>
         <PortfolioSection isActive={activeSection === 2} />
       </SectionWrapper>
 
-      <SectionWrapper
-        $offset={3 - activeSection}
-        ref={el => { sectionRefs.current[3] = el }}
-      >
+      <SectionWrapper $offset={3 - activeSection} ref={setRef3}>
         <ContactSection isActive={activeSection === 3} />
       </SectionWrapper>
     </MainWrapper>
