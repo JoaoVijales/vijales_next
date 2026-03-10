@@ -248,7 +248,7 @@ export default function HeroSection({ isActive = false }: HeroSectionProps) {
       <Subtitle>
         Desenvolvemos o futuro. Arquitetamos soluções digitais que transcendem o código e transformam visões em realidade tecnológica.
       </Subtitle>
-      <CtaButton href="https://wa.me/5548998699159">
+      <CtaButton href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '5548988699159'}`}>
         <span>Entrar em contato</span>
       </CtaButton>
     </HeroWrapper>

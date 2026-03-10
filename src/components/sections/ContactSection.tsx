@@ -5,7 +5,7 @@ import styled, { keyframes } from 'styled-components'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const WHATSAPP_NUMBER = '5548988699159'
+const WHATSAPP_NUMBER = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '5548988699159'
 const WHATSAPP_PRE_MESSAGE = encodeURIComponent(
   'Olá! Vi seu portfólio e quero conversar sobre um projeto. Pode me chamar?'
 )
@@ -182,7 +182,7 @@ const WhatsAppButtonWrapper = styled.div`
   gap: 1.2rem;
 `
 
-const WhatsAppButton = styled.a`
+const WhatsAppButton = styled.a<{ $isActive?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 0.9rem;
@@ -201,6 +201,7 @@ const WhatsAppButton = styled.a`
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
   animation: ${float} 3s ease-in-out infinite;
+  animation-play-state: ${props => props.$isActive ? 'running' : 'paused'};
 
   &::before {
     content: '';
@@ -214,6 +215,7 @@ const WhatsAppButton = styled.a`
     );
     background-size: 200% 100%;
     animation: ${glowScan} 2.5s linear infinite;
+    animation-play-state: ${props => props.$isActive ? 'running' : 'paused'};
     pointer-events: none;
   }
 
@@ -239,7 +241,7 @@ const WhatsAppButton = styled.a`
   }
 `
 
-const WhatsAppIconWrapper = styled.span`
+const WhatsAppIconWrapper = styled.span<{ $isActive?: boolean }>`
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -251,6 +253,7 @@ const WhatsAppIconWrapper = styled.span`
     border-radius: 50%;
     border: 2px solid #25D366;
     animation: ${orbitPing} 1.8s ease-out infinite;
+    animation-play-state: ${props => props.$isActive ? 'running' : 'paused'};
   }
 
   svg {
@@ -268,7 +271,7 @@ const PhoneDisplay = styled.p`
   margin: 0;
 `
 
-const AvailabilityBadge = styled.span`
+const AvailabilityBadge = styled.span<{ $isActive?: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -284,6 +287,7 @@ const AvailabilityBadge = styled.span`
     background: #25D366;
     border-radius: 50%;
     animation: ${pulse} 2s ease infinite;
+    animation-play-state: ${props => props.$isActive ? 'running' : 'paused'};
     flex-shrink: 0;
   }
 `
@@ -333,18 +337,19 @@ export default function ContactSection({ isActive = false }: ContactSectionProps
         </BenefitsList>
 
         <WhatsAppButtonWrapper>
-          <AvailabilityBadge>
+          <AvailabilityBadge $isActive={isActive}>
             <span className="dot" />
             Disponível agora
           </AvailabilityBadge>
 
           <WhatsAppButton
+            $isActive={isActive}
             href={WHATSAPP_URL}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Falar pelo WhatsApp"
           >
-            <WhatsAppIconWrapper>
+            <WhatsAppIconWrapper $isActive={isActive}>
               <span className="ping" aria-hidden="true" />
               {/* WhatsApp SVG icon */}
               <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
