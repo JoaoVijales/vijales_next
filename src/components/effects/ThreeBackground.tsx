@@ -304,6 +304,16 @@ export default function ThreeBackground() {
             window.removeEventListener('resize', onWindowResize)
             document.removeEventListener('mousemove', onMouseMove)
 
+            if (particles) {
+                particles.geometry.dispose()
+                ;(particles.material as THREE.Material).dispose()
+            }
+
+            gridRunners.forEach(runner => {
+                runner.line.geometry.dispose()
+                ;(runner.line.material as THREE.Material).dispose()
+            })
+
             if (renderer) {
                 renderer.dispose()
                 if (mountRef.current && renderer.domElement.parentNode === mountRef.current) {
@@ -317,6 +327,7 @@ export default function ThreeBackground() {
         <div
             ref={mountRef}
             id="canvas-container"
+            aria-hidden="true"
             style={{
                 position: 'fixed',
                 top: 0,
