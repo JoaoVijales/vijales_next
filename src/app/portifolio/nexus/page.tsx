@@ -1,1060 +1,739 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
 import * as THREE from 'three'
 
-// --- Animations ---
+// ─── Animations ───────────────────────────────────────────────────────────────
 
 const fadeInUp = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+`
 
-const pulse = keyframes`
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.7;
-  }
-`;
+const glowPulse = keyframes`
+  0%, 100% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
+  50%       { box-shadow: 0 0 50px rgba(99, 102, 241, 0.8), 0 0 100px rgba(99, 102, 241, 0.15); }
+`
 
-// --- Styled Components ---
+const lineDown = keyframes`
+  0%   { height: 0;    opacity: 1; }
+  100% { height: 50px; opacity: 0; }
+`
+
+const scanline = keyframes`
+  0%   { top: -2px; }
+  100% { top: 100%; }
+`
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
 
 const Container = styled.div`
-  background-color: #0f172a;
-  color: #f8fafc;
-  min-height: 100vh;
-  font-family: var(--font-open-sans), sans-serif;
+  background: #020617;
+  color: #fff;
+  font-family: var(--font-montserrat), sans-serif;
   overflow-x: hidden;
-`;
+`
 
-const Nav = styled.nav`
+// ─── Nav ──────────────────────────────────────────────────────────────────────
+
+const Nav = styled.nav<{ $scrolled: boolean }>`
   position: fixed;
+  top: 0;
   width: 100%;
-  z-index: 50;
-  background-color: rgba(15, 23, 42, 0.9);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid #1e293b;
-`;
+  z-index: 100;
+  transition: all 0.4s ease;
+  background:      ${p => p.$scrolled ? 'rgba(2,6,23,0.95)' : 'transparent'};
+  backdrop-filter: ${p => p.$scrolled ? 'blur(12px)'        : 'none'};
+  border-bottom:   ${p => p.$scrolled ? '1px solid rgba(99,102,241,0.2)' : 'none'};
+`
 
-const NavContainer = styled.div`
+const NavInner = styled.div`
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
   height: 5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  @media (min-width: 640px) {
-    padding: 0 1.5rem;
-  }
-  @media (min-width: 1024px) {
-    padding: 0 2rem;
-  }
-`;
+  @media (max-width: 640px) { padding: 0 1.2rem; }
+`
 
-const Logo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+const NavLogo = styled.span`
+  font-family: var(--font-orbitron), monospace;
+  font-size: 1.1rem;
   font-weight: 700;
-  font-size: 1.5rem;
-  letter-spacing: -0.05em;
-  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 2px;
+  color: #fff;
 
-  .icon {
-    color: #a3e635;
-    font-size: 2.25rem;
-  }
-
-  span {
-    color: #a3e635;
-  }
-`;
+  em { color: #6366f1; font-style: normal; }
+`
 
 const NavLinks = styled.div`
-  display: none;
-  @media (min-width: 768px) {
-    display: flex;
-    align-items: baseline;
-    gap: 2rem;
-  }
-`;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+
+  @media (max-width: 640px) { gap: 1rem; }
+`
 
 const NavLink = styled.a`
-  font-weight: 500;
-  transition: color 0.15s ease-in-out;
-  padding: 0.5rem 0.75rem;
-  border-radius: 0.375rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: color 0.2s;
 
-  &:hover {
-    color: #a3e635;
-  }
-`;
+  &:hover { color: #6366f1; }
 
-const BtnPrimary = styled.a`
-  background-color: #a3e635;
-  color: #0f172a;
-  font-weight: 700;
-  padding: 0.5rem 1.25rem;
-  border-radius: 9999px;
-  transition: all 0.3s ease;
+  @media (max-width: 640px) { display: none; }
+`
 
-  &:hover {
-    background-color: #bef264;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(163, 230, 53, 0.4);
-  }
-`;
-
-const MobileMenuBtn = styled.button`
+const BackLink = styled.a`
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
-  color: #9ca3af;
-  transition: all 0.2s;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  transition: color 0.2s;
 
-  @media (min-width: 768px) {
-    display: none;
-  }
+  &:hover { color: #6366f1; }
+`
 
-  &:hover {
-    color: white;
-    background-color: #374151;
-  }
-`;
+// ─── Hero ─────────────────────────────────────────────────────────────────────
 
-const MobileMenu = styled.div<{ $isOpen: boolean }>`
-  display: ${props => props.$isOpen ? 'block' : 'none'};
-  background-color: #1e293b;
-  width: 100%;
-
-  @media (min-width: 768px) {
-    display: none;
-  }
-`;
-
-const Hero = styled.header`
+const Hero = styled.section`
   position: relative;
   height: 100vh;
+  min-height: 680px;
   display: flex;
   align-items: center;
-  justify-content: center;
   overflow: hidden;
-`;
-
-const HeroBg = styled.div`
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .gradient {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.9));
-  }
-`;
-
-const HeroContent = styled.div`
-  position: relative;
-  z-index: 10;
-  text-align: center;
-  padding: 0 1rem;
-  max-width: 64rem;
-  margin: 4rem auto 0;
-
-  @media (min-width: 640px) {
-    padding: 0 1.5rem;
-  }
-  @media (min-width: 1024px) {
-    padding: 0 2rem;
-  }
-  animation: ${fadeInUp} 0.8s ease-out;
-`;
-
-const Badge = styled.div`
-  display: inline-block;
-  margin-bottom: 1rem;
-  padding: 0.25rem 1rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(163, 230, 53, 0.5);
-  background-color: rgba(163, 230, 53, 0.1);
-  backdrop-filter: blur(4px);
-  color: #a3e635;
-  font-weight: 600;
-  letter-spacing: 0.025em;
-  text-transform: uppercase;
-  font-size: 0.875rem;
-`;
-
-const Title = styled.h1`
-  font-size: 3rem;
-  font-weight: 800;
-  color: white;
-  margin-bottom: 1.5rem;
-  letter-spacing: -0.025em;
-  line-height: 1;
-  font-family: 'Montserrat', sans-serif;
-
-  @media (min-width: 768px) {
-    font-size: 4.5rem;
-  }
-
-  span {
-    color: transparent;
-    background-clip: text;
-    -webkit-background-clip: text;
-    background-image: linear-gradient(to right, #a3e635, #10b981);
-  }
-`;
-
-const Description = styled.p`
-  margin-top: 1rem;
-  max-width: 42rem;
-  margin-left: auto;
-  margin-right: auto;
-  font-size: 1.25rem;
-  color: #cbd5e1;
-  margin-bottom: 2.5rem;
-`;
-
-const HeroActions = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1rem;
-
-  @media (min-width: 640px) {
-    flex-direction: row;
-  }
-`;
-
-const LargeBtn = styled(BtnPrimary)`
-  padding: 1rem 2rem;
-  font-size: 1.125rem;
-  box-shadow: 0 10px 15px -3px rgba(163, 230, 53, 0.2);
-`;
-
-const SecondaryBtn = styled.a`
-  padding: 1rem 2rem;
-  font-size: 1.125rem;
-  font-weight: 700;
-  border: 1px solid #475569;
-  border-radius: 9999px;
-  color: white;
-  background-color: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(4px);
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: #1e293b;
-    border-color: #64748b;
-  }
-`;
-
-const StatsStrip = styled.div`
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  background-color: rgba(15, 23, 42, 0.8);
-  backdrop-filter: blur(12px);
-  border-top: 1px solid #1e293b;
-  display: none;
-  justify-content: space-around;
-  padding: 1.5rem 0;
-  text-align: center;
-
-  @media (min-width: 768px) {
-    display: flex;
-  }
-
-  .stat-val {
-    display: block;
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: #a3e635;
-  }
-
-  .stat-label {
-    font-size: 0.875rem;
-    color: #94a3b8;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-`;
-
-const Section = styled.section`
-  padding: 6rem 0;
-`;
-
-const SectionHeader = styled.div`
-  text-align: center;
-  margin-bottom: 4rem;
-
-  h2 {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 1rem;
-    font-family: var(--font-montserrat), sans-serif;
-
-    @media (min-width: 768px) {
-      font-size: 2.25rem;
-    }
-  }
-
-  .divider {
-    width: 6rem;
-    height: 0.25rem;
-    background-color: #84cc16;
-    margin: 0 auto;
-    border-radius: 9999px;
-  }
-
-  p {
-    margin-top: 1rem;
-    color: #94a3b8;
-    font-size: 1.125rem;
-  }
-`;
-
-const FeaturesGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 2rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1rem;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  @media (min-width: 1024px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-`;
-
-const FeatureCard = styled.div`
-  position: relative;
-  overflow: hidden;
-  border-radius: 1rem;
-  cursor: pointer;
-  height: 20rem;
-
-  &:hover img {
-    transform: scale(1.1);
-  }
-
-  &:hover .content {
-    transform: translateY(0);
-  }
-
-  &:hover .description {
-    opacity: 1;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
-  }
-
-  .overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, #0f172a, rgba(15, 23, 42, 0.4), transparent);
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-  }
-
-  .content {
-    transform: translateY(1.5rem);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 0.5rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-family: 'Montserrat', sans-serif;
-
-    .icon {
-      color: #a3e635;
-      font-variation-settings: 'FILL' 1;
-    }
-  }
-
-  .description {
-    color: #cbd5e1;
-    opacity: 0;
-    transform: translateY(10px);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  &:hover .content {
-    transform: translateY(0);
-  }
-
-  &:hover .description {
-    opacity: 1;
-    transform: translateY(0);
-  }
-
-  .icon {
-    font-variation-settings: 'FILL' 1;
-  }
-`;
-
-const ScheduleSection = styled(Section)`
-  background-color: #1e293b;
-  border-top: 1px solid #334155;
-  border-bottom: 1px solid #334155;
-`;
-
-const TabsContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-  overflow-x: auto;
-  gap: 0.5rem;
-  padding-bottom: 0.5rem;
-  max-width: 100%;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-`;
-
-const TabButton = styled.button<{ $active: boolean }>`
-  padding: 0.5rem 1.5rem;
-  border-radius: 9999px;
-  font-weight: 700;
-  transition: all 0.2s;
-  background-color: ${props => props.$active ? '#a3e635' : '#334155'};
-  color: ${props => props.$active ? '#0f172a' : '#cbd5e1'};
-  white-space: nowrap;
-
-  &:hover {
-    background-color: ${props => props.$active ? '#a3e635' : '#475569'};
-  }
-`;
-
-const ScheduleList = styled.div`
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 0 1rem;
-  display: grid;
-  gap: 1rem;
-`;
-
-const ScheduleItem = styled.div`
-  background-color: rgba(51, 65, 85, 0.5);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid #475569;
-  transition: border-color 0.2s;
-
-  @media (min-width: 768px) {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  &:hover {
-    border-color: #a3e635;
-  }
-
-  .info {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    width: 100%;
-    margin-bottom: 0.5rem;
-
-    @media (min-width: 768px) {
-      width: auto;
-      margin-bottom: 0;
-    }
-  }
-
-  .time {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #a3e635;
-    width: 4rem;
-  }
-
-  h4 {
-    font-size: 1.125rem;
-    font-weight: 700;
-    color: white;
-  }
-
-  .trainer {
-    font-size: 0.875rem;
-    color: #94a3b8;
-  }
-
-  .intensity {
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    align-self: flex-end;
-
-    @media (min-width: 768px) {
-      align-self: center;
-    }
-  }
-
-  .high { background-color: rgba(239, 68, 68, 0.2); color: #f87171; }
-  .medium { background-color: rgba(234, 179, 8, 0.2); color: #facc15; }
-  .low { background-color: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-`;
-
-const TrainersGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 2.5rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1rem;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-`;
-
-const TrainerCard = styled.div`
-  background-color: #1e293b;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  border: 1px solid #334155;
-  transition: all 0.3s;
-
-  &:hover {
-    border-color: #a3e635;
-  }
-
-  .img-container {
-    height: 24rem;
-    position: relative;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top;
-  }
-
-  .overlay {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    background: linear-gradient(to top, #0f172a, transparent);
-    padding: 1.5rem;
-    padding-top: 5rem;
-  }
-
-  h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: white;
-  }
-
-  .specialty {
-    color: #a3e635;
-    font-weight: 500;
-  }
-
-  .details {
-    padding: 1.5rem;
-  }
-
-  p {
-    font-size: 0.875rem;
-    color: #94a3b8;
-    margin-bottom: 1rem;
-    font-style: italic;
-  }
-
-  .social {
-    color: #64748b;
-    display: flex;
-    gap: 0.5rem;
-    
-    .icon {
-      cursor: pointer;
-      &:hover { color: white; }
-    }
-  }
-`;
-
-const CalculatorSection = styled(Section)`
-  background-color: #1e293b;
-  position: relative;
-  overflow: hidden;
-
-  .glow {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 16rem;
-    height: 16rem;
-    background-color: rgba(163, 230, 53, 0.1);
-    border-radius: 9999px;
-    filter: blur(64px);
-  }
-`;
-
-const CalculatorContainer = styled.div`
-  max-width: 56rem;
-  margin: 0 auto;
-  padding: 0 1rem;
-  position: relative;
-  z-index: 10;
-`;
-
-const CalculatorBox = styled.div`
-  background-color: #0f172a;
-  border-radius: 1.5rem;
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-  align-items: center;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  border: 1px solid #334155;
-
-  @media (min-width: 768px) {
-    padding: 3rem;
-    flex-direction: row;
-  }
-
-  .form-container {
-    flex: 1;
-    width: 100%;
-  }
-
-  .result-container {
-    flex: 1;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(51, 65, 85, 0.5);
-    border-radius: 1rem;
-    padding: 2rem;
-    border: 1px solid rgba(51, 65, 85, 0.5);
-  }
-`;
-
-const InputGroup = styled.div`
-  margin-bottom: 1rem;
-  
-  label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #cbd5e1;
-    margin-bottom: 0.25rem;
-  }
-
-  input {
-    width: 100%;
-    background-color: #1e293b;
-    border: 1px solid #475569;
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    color: white;
-    outline: none;
-    transition: border-color 0.2s;
-
-    &:focus {
-      border-color: #a3e635;
-    }
-  }
-`;
-
-const CalculatorBtn = styled.button`
-  width: 100%;
-  background-color: #a3e635;
-  color: #0f172a;
-  font-weight: 700;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  margin-top: 0.5rem;
-  transition: all 0.3s;
-
-  &:hover {
-    background-color: #bef264;
-  }
-`;
-
-const BmiCircle = styled.div`
-  width: 10rem;
-  height: 10rem;
-  border-radius: 9999px;
-  border: 8px solid #334155;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1rem;
-  transition: all 0.5s;
-  background-color: #1e293b;
-
-  &.blue { border-color: #60a5fa; color: #60a5fa; }
-  &.green { border-color: #4ade80; color: #4ade80; }
-  &.yellow { border-color: #facc15; color: #facc15; }
-  &.red { border-color: #f87171; color: #f87171; }
-
-  span {
-    font-size: 2.25rem;
-    font-weight: 700;
-    color: inherit;
-  }
-`;
-
-const PlansGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 2rem;
-  max-width: 64rem;
-  margin: 0 auto;
-  padding: 0 1rem;
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-`;
-
-const PlanCard = styled.div<{ $featured?: boolean }>`
-  background-color: #1e293b;
-  border-radius: 1rem;
-  padding: 2rem;
-  border: ${props => props.$featured ? '2px solid #a3e635' : '1px solid #334155'};
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s;
-  position: relative;
-  
-  ${props => props.$featured && `
-    transform: translateY(-1rem);
-    box-shadow: 0 20px 25px -5px rgba(163, 230, 53, 0.1);
-  `}
-
-  @media (max-width: 767px) {
-    ${props => props.$featured && `
-      transform: none;
-    `}
-  }
-
-  &:hover {
-    border-color: ${props => props.$featured ? '#a3e635' : '#64748b'};
-  }
-
-  .popular-tag {
-    position: absolute;
-    top: 0;
-    right: 0;
-    background-color: #a3e635;
-    color: #0f172a;
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 0.25rem 0.75rem;
-    border-bottom-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
-  }
-
-  h3 {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 0.5rem;
-  }
-
-  .subtitle {
-    font-size: 0.875rem;
-    color: #94a3b8;
-    margin-bottom: 1.5rem;
-  }
-
-  .price {
-    margin-bottom: 1.5rem;
-    
-    .val {
-      font-size: 2.25rem;
-      font-weight: 700;
-      color: white;
-      transition: opacity 0.2s;
-    }
-    
-    .period {
-      color: #64748b;
-    }
-  }
-
-  ul {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 2rem 0;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.875rem;
-    color: #cbd5e1;
-
-    .icon {
-      color: #a3e635;
-      font-size: 1rem;
-    }
-  }
-`;
-
-const PlanBtn = styled.button<{ $featured?: boolean }>`
-  width: 100%;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  font-weight: 700;
-  transition: all 0.2s;
-  
-  ${props => props.$featured ? `
-    background-color: #a3e635;
-    color: #0f172a;
-    box-shadow: 0 10px 15px -3px rgba(163, 230, 53, 0.25);
-    &:hover { background-color: #bef264; }
-  ` : `
-    background-color: transparent;
-    border: 1px solid #a3e635;
-    color: #a3e635;
-    &:hover { 
-      background-color: #a3e635; 
-      color: #0f172a;
-    }
-  `}
-`;
-
-const ContactGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-
-  @media (min-width: 768px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-`;
-
-const FormPane = styled.div`
-  background-color: #1e293b;
-  padding: 2.5rem;
-
-  @media (min-width: 768px) {
-    padding: 4rem;
-  }
-
-  h2 {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: white;
-    margin-bottom: 1.5rem;
-  }
-
-  p {
-    color: #94a3b8;
-    margin-bottom: 2rem;
-  }
-
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  input {
-    width: 100%;
-    background-color: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 0.5rem;
-    padding: 0.75rem 1rem;
-    color: white;
-    outline: none;
-
-    &:focus {
-      border-color: #a3e635;
-    }
-  }
-
-  .form-footer {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    border-top: 1px solid #334155;
-    display: flex;
-    gap: 1.5rem;
-    color: #94a3b8;
-    
-    .item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .icon {
-      color: #a3e635;
-    }
-  }
-`;
-
-const MapPane = styled.div`
-  background-color: #0f172a;
-  min-height: 300px;
-  /* Placeholder for map if needed */
-`;
+`
 
 const ThreeMount = styled.div`
   position: absolute;
   inset: 0;
+  z-index: 0;
+`
+
+const HeroOverlay = styled.div`
+  position: absolute;
+  inset: 0;
   z-index: 1;
-  pointer-events: none;
-`;
+  background: linear-gradient(
+    135deg,
+    rgba(2,6,23,0.85) 0%,
+    rgba(2,6,23,0.3) 55%,
+    rgba(2,6,23,0.65) 100%
+  );
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.2), transparent);
+    animation: ${scanline} 6s linear infinite;
+  }
+`
+
+const HeroContent = styled.div`
+  position: relative;
+  z-index: 2;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  animation: ${fadeInUp} 1.2s ease both;
+
+  @media (max-width: 640px) { padding: 0 1.2rem; }
+`
+
+const HeroBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(99,102,241,0.1);
+  border: 1px solid rgba(99,102,241,0.45);
+  color: #818cf8;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  padding: 0.5rem 1.2rem;
+  margin-bottom: 2rem;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+`
+
+const HeroTitle = styled.h1`
+  font-family: var(--font-orbitron), monospace;
+  font-size: clamp(2.2rem, 5.5vw, 4.8rem);
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  margin-bottom: 1.5rem;
+
+  .indigo { color: #6366f1; }
+  .cyan   { color: #00C8FF; }
+`
+
+const HeroSub = styled.p`
+  font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+  color: rgba(255,255,255,0.65);
+  max-width: 580px;
+  line-height: 1.9;
+  font-weight: 300;
+  margin-bottom: 3rem;
+`
+
+const HeroStats = styled.div`
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 480px) { gap: 1.5rem; }
+`
+
+const Stat = styled.div`
+  .value {
+    display: block;
+    font-family: var(--font-orbitron), monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #6366f1;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .label {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+`
+
+const ScrollHint = styled.div`
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.6rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+
+  &::after {
+    content: '';
+    width: 1px;
+    background: linear-gradient(to bottom, rgba(99,102,241,0.9), transparent);
+    animation: ${lineDown} 1.8s ease-in-out infinite;
+  }
+`
+
+// ─── Sections base ────────────────────────────────────────────────────────────
+
+const SectionWrap = styled.section`
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 7rem 2rem;
+
+  @media (max-width: 768px) { padding: 4rem 1.5rem; }
+`
+
+const SectionLabel = styled.p`
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: #6366f1;
+  margin-bottom: 0.8rem;
+`
+
+const SectionTitle = styled.h2`
+  font-family: var(--font-orbitron), monospace;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin-bottom: 1.2rem;
+`
+
+const SectionDivider = styled.div`
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #00C8FF);
+  margin-bottom: 3.5rem;
+`
+
+// ─── Overview ─────────────────────────────────────────────────────────────────
+
+const OverviewGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+`
+
+const OverviewText = styled.div`
+  p {
+    color: rgba(255,255,255,0.65);
+    line-height: 1.95;
+    font-size: 0.98rem;
+    font-weight: 300;
+    margin-bottom: 1.4rem;
+
+    strong {
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
+    }
+  }
+`
+
+const Screenshot = styled.div`
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, #6366f1, #00C8FF, #6366f1);
+    background-size: 200% 200%;
+    z-index: -1;
+    opacity: 0.5;
+  }
+
+  img {
+    width: 100%;
+    display: block;
+    filter: brightness(0.88) contrast(1.05);
+  }
+`
+
+// ─── Features ─────────────────────────────────────────────────────────────────
+
+const FeaturesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+
+  @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 580px)  { grid-template-columns: 1fr; }
+`
+
+const FeatureCard = styled.div`
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 2rem 1.8rem;
+  position: relative;
+  transition: all 0.3s ease;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 18px;
+    height: 18px;
+    background: #6366f1;
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    transition: background 0.3s;
+  }
+
+  &:hover {
+    border-color: rgba(99,102,241,0.35);
+    background: rgba(99,102,241,0.04);
+    transform: translateY(-5px);
+    box-shadow: 0 24px 48px rgba(99,102,241,0.08);
+  }
+
+  &:hover::after { background: #00C8FF; }
+
+  .icon {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+
+  h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 0.8rem;
+  }
+
+  p {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.875rem;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+`
+
+// ─── Architecture ─────────────────────────────────────────────────────────────
+
+const ArchGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+`
+
+const ArchBlock = styled.div`
+  h3 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #00C8FF;
+    margin-bottom: 1.5rem;
+  }
+`
+
+const ArchList = styled.ul`
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+`
+
+const ArchItem = styled.li`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.6;
+
+  &::before {
+    content: '▸';
+    color: #6366f1;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+`
+
+// ─── Tech Stack ───────────────────────────────────────────────────────────────
+
+const TechWrap = styled.section`
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 5rem 2rem;
+`
+
+const TechInner = styled.div`
+  max-width: 1280px;
+  margin: 0 auto;
+`
+
+const TechGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+`
+
+const TechBadge = styled.div<{ $cyan?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.2rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid ${p => p.$cyan ? 'rgba(0,200,255,0.35)' : 'rgba(99,102,241,0.3)'};
+  color: ${p => p.$cyan ? '#00C8FF' : '#818cf8'};
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: background 0.2s;
+
+  &:hover { background: rgba(255,255,255,0.06); }
+`
+
+// ─── CTA ──────────────────────────────────────────────────────────────────────
+
+const CTASection = styled.section`
+  position: relative;
+  padding: 8rem 2rem;
+  text-align: center;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(99,102,241,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+`
+
+const CTATitle = styled.h2`
+  font-family: var(--font-orbitron), monospace;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+
+  span { color: #6366f1; }
+`
+
+const CTASub = styled.p`
+  color: rgba(255,255,255,0.55);
+  font-size: 1.05rem;
+  line-height: 1.9;
+  font-weight: 300;
+  max-width: 520px;
+  margin: 0 auto 3rem;
+`
+
+const CTAButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+`
+
+const CTABtn = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: #6366f1;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 1.2rem 3rem;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  transition: all 0.3s ease;
+  animation: ${glowPulse} 3s ease-in-out infinite;
+
+  &:hover {
+    background: #818cf8;
+    transform: translateY(-3px);
+  }
+`
+
+const CTABtnOutline = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 1.2rem 3rem;
+  border: 1px solid rgba(255,255,255,0.15);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #6366f1;
+    color: #818cf8;
+    transform: translateY(-3px);
+  }
+`
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
 
 const Footer = styled.footer`
-  background-color: #020617;
-  color: #94a3b8;
-  padding: 3rem 0;
-  border-top: 1px solid #0f172a;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 2.5rem 2rem;
+  text-align: center;
+`
 
-  .footer-container {
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1.5rem;
+const FooterBack = styled.a`
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  text-decoration: none;
+  transition: color 0.2s;
 
-    @media (min-width: 768px) {
-      flex-direction: row;
-      padding: 0 2rem;
-    }
-  }
+  &:hover { color: #6366f1; }
+`
 
-  .copy-right {
-    font-size: 0.875rem;
-    text-align: center;
-    @media (min-width: 768px) {
-      text-align: right;
-    }
-  }
-`;
+// ─── Data ─────────────────────────────────────────────────────────────────────
 
-// ─── Three.js Energy Network ──────────────────────────────────────────────────
+const FEATURES = [
+  {
+    icon: '🏋️',
+    title: 'Catálogo de Modalidades',
+    desc: 'Apresentação completa das aulas — Musculação, Yoga, Cross Training, Boxe, Cardio e Spinning — com descrições e imagens.',
+  },
+  {
+    icon: '💳',
+    title: 'Planos e Preços',
+    desc: 'Três planos (Básico, Premium, Elite) com comparação de benefícios e botão de matrícula direto para conversão.',
+  },
+  {
+    icon: '📅',
+    title: 'Grade de Horários',
+    desc: 'Tabela semanal interativa com todas as aulas, instrutores e horários disponíveis para facilitar o planejamento do aluno.',
+  },
+  {
+    icon: '👥',
+    title: 'Time de Instrutores',
+    desc: 'Perfis dos profissionais com foto, especialidade e credenciais para gerar credibilidade e conexão com o visitante.',
+  },
+  {
+    icon: '⭐',
+    title: 'Depoimentos',
+    desc: 'Seção de testemunhos de alunos reais com foto, nome e resultado alcançado para aumentar a taxa de conversão.',
+  },
+  {
+    icon: '📍',
+    title: 'Localização e Contato',
+    desc: 'Mapa integrado, endereço, telefone e formulário de contato para facilitar o primeiro passo do visitante.',
+  },
+]
 
-function useEnergyNetwork(mountRef: React.RefObject<HTMLDivElement | null>) {
+const ARCH_DESIGN = [
+  'Layout responsivo mobile-first',
+  'Navegação fixa com transparência ao scroll',
+  'Seções em carrossel horizontal para modalidades',
+  'Cards de plano com destaque no Premium',
+  'Galeria de depoimentos com avatar e rating',
+  'Animações de entrada com fadeInUp',
+]
+
+const ARCH_UX = [
+  'CTA primário no hero direcionado à matrícula',
+  'Grade de horários com filtro por dia',
+  'Perfis de instrutores com hover interativo',
+  'Formulário de contato com validação',
+  'Footer com links rápidos e redes sociais',
+  'Paleta escura com accent índigo/azul',
+]
+
+const TECH = [
+  { label: 'Next.js',           cyan: false },
+  { label: 'React 19',          cyan: false },
+  { label: 'TypeScript',        cyan: false },
+  { label: 'Styled-Components', cyan: true  },
+  { label: 'Material Symbols',  cyan: true  },
+  { label: 'CSS Animations',    cyan: true  },
+]
+
+// ─── Three.js Gym Scene ───────────────────────────────────────────────────────
+
+function useGymScene(mountRef: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = mountRef.current
     if (!el) return
 
     const scene = new THREE.Scene()
+    scene.fog = new THREE.FogExp2(0x020617, 0.022)
 
-    const camera = new THREE.PerspectiveCamera(70, el.clientWidth / el.clientHeight, 0.1, 300)
-    camera.position.set(0, 0, 60)
+    const camera = new THREE.PerspectiveCamera(60, el.clientWidth / el.clientHeight, 0.1, 500)
+    camera.position.set(0, 12, 48)
+    camera.lookAt(0, 0, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(el.clientWidth, el.clientHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     el.appendChild(renderer.domElement)
 
-    // ── Nodes ──
-    const LIME  = new THREE.Color(0xa3e635)
-    const TEAL  = new THREE.Color(0x10b981)
-    const NODE_COUNT = 60
+    const INDIGO = new THREE.Color(0x6366f1)
+    const CYAN   = new THREE.Color(0x00c8ff)
 
-    const nodePositions: THREE.Vector3[] = []
-    const nodeMeshes: THREE.Mesh[] = []
-    const nodeGeo = new THREE.SphereGeometry(0.35, 8, 8)
+    const grid = new THREE.GridHelper(200, 40, 0x6366f1, 0x0a0a1a)
+    ;(grid.material as THREE.Material).opacity = 0.25
+    ;(grid.material as THREE.Material).transparent = true
+    grid.position.y = -8
+    scene.add(grid)
 
-    for (let i = 0; i < NODE_COUNT; i++) {
-      const x = (Math.random() - 0.5) * 90
-      const y = (Math.random() - 0.5) * 55
-      const z = (Math.random() - 0.5) * 30
-      const pos = new THREE.Vector3(x, y, z)
-      nodePositions.push(pos)
+    const rings: THREE.LineSegments[] = []
+    const ringData = [
+      [-16, 4, -4, 14, true ],
+      [  0, 6, -8, 20, false],
+      [ 16, 3, -3, 12, true ],
+      [ -8, 8,  4, 10, false],
+      [  8, 5,  5, 16, true ],
+    ] as const
 
-      const mat = new THREE.MeshBasicMaterial({
-        color: Math.random() > 0.4 ? LIME : TEAL,
+    for (const [x, y, z, r, isIndigo] of ringData) {
+      const geo = new THREE.TorusGeometry(r * 0.4, 0.08, 6, 6)
+      const edges = new THREE.EdgesGeometry(geo)
+      const mat = new THREE.LineBasicMaterial({
+        color: isIndigo ? INDIGO : CYAN,
         transparent: true,
-        opacity: 0.6 + Math.random() * 0.4,
+        opacity: 0.5,
+        blending: THREE.AdditiveBlending,
       })
-      const mesh = new THREE.Mesh(nodeGeo, mat)
-      mesh.position.copy(pos)
-      scene.add(mesh)
-      nodeMeshes.push(mesh)
+      const ring = new THREE.LineSegments(edges, mat)
+      ring.position.set(x, y - 8, z)
+      scene.add(ring)
+      rings.push(ring)
+      geo.dispose()
     }
 
-    // ── Edges (connect nearby nodes) ──
-    const edgePositions: number[] = []
-    const CONNECTION_DIST = 22
+    const count = 900
+    const pos = new Float32Array(count * 3)
+    const col = new Float32Array(count * 3)
 
-    for (let i = 0; i < NODE_COUNT; i++) {
-      for (let j = i + 1; j < NODE_COUNT; j++) {
-        if (nodePositions[i].distanceTo(nodePositions[j]) < CONNECTION_DIST) {
-          edgePositions.push(
-            nodePositions[i].x, nodePositions[i].y, nodePositions[i].z,
-            nodePositions[j].x, nodePositions[j].y, nodePositions[j].z,
-          )
-        }
-      }
+    for (let i = 0; i < count; i++) {
+      pos[i * 3]     = (Math.random() - 0.5) * 120
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 60
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 120
+      const c = Math.random() > 0.5 ? INDIGO : CYAN
+      col[i * 3]     = c.r
+      col[i * 3 + 1] = c.g
+      col[i * 3 + 2] = c.b
     }
 
-    const edgeGeo = new THREE.BufferGeometry()
-    edgeGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgePositions, 3))
-    const edgeMat = new THREE.LineBasicMaterial({
-      color: 0xa3e635,
+    const pGeo = new THREE.BufferGeometry()
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    pGeo.setAttribute('color',    new THREE.BufferAttribute(col, 3))
+
+    const pMat = new THREE.PointsMaterial({
+      size: 0.3,
+      vertexColors: true,
       transparent: true,
-      opacity: 0.12,
+      opacity: 0.7,
       blending: THREE.AdditiveBlending,
     })
-    const edges = new THREE.LineSegments(edgeGeo, edgeMat)
-    scene.add(edges)
 
-    // ── Mouse ──
+    const particles = new THREE.Points(pGeo, pMat)
+    scene.add(particles)
+
     let mouseX = 0
     let mouseY = 0
     const onMouseMove = (e: MouseEvent) => {
@@ -1063,7 +742,6 @@ function useEnergyNetwork(mountRef: React.RefObject<HTMLDivElement | null>) {
     }
     document.addEventListener('mousemove', onMouseMove)
 
-    // ── Resize ──
     const onResize = () => {
       if (!el) return
       camera.aspect = el.clientWidth / el.clientHeight
@@ -1072,441 +750,217 @@ function useEnergyNetwork(mountRef: React.RefObject<HTMLDivElement | null>) {
     }
     window.addEventListener('resize', onResize)
 
-    // ── Animate ──
     let frameId: number
     let t = 0
 
     const animate = () => {
       frameId = requestAnimationFrame(animate)
-      t += 0.008
+      t += 0.004
 
-      // Drift nodes gently
-      nodeMeshes.forEach((mesh, i) => {
-        const mat = mesh.material as THREE.MeshBasicMaterial
-        mat.opacity = 0.4 + Math.abs(Math.sin(t + i * 0.4)) * 0.6
-        mesh.position.y = nodePositions[i].y + Math.sin(t * 0.5 + i) * 0.8
+      scene.rotation.y = t * 0.1 + mouseX * 0.07
+      camera.position.y = 12 + Math.sin(t * 0.4) * 1.5 + mouseY * -2
+      camera.lookAt(0, 0, 0)
+
+      rings.forEach((r, i) => {
+        r.rotation.x = t * 0.3 + i * 0.5
+        r.rotation.z = t * 0.2 + i * 0.3
+        ;(r.material as THREE.LineBasicMaterial).opacity = 0.3 + Math.sin(t + i * 0.9) * 0.2
       })
 
-      scene.rotation.y = mouseX * 0.06 + t * 0.015
-      scene.rotation.x = mouseY * 0.04
-
+      particles.rotation.y = t * 0.04
       renderer.render(scene, camera)
     }
     animate()
 
-    // ── Cleanup ──
     return () => {
       cancelAnimationFrame(frameId)
       document.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('resize', onResize)
 
-      nodeMeshes.forEach(m => {
-        scene.remove(m)
-        ;(m.material as THREE.Material).dispose()
+      scene.remove(grid)
+      grid.geometry.dispose()
+      ;(grid.material as THREE.Material).dispose()
+
+      rings.forEach(r => {
+        scene.remove(r)
+        r.geometry.dispose()
+        ;(r.material as THREE.Material).dispose()
       })
-      nodeGeo.dispose()
 
-      scene.remove(edges)
-      edgeGeo.dispose()
-      edgeMat.dispose()
-
+      scene.remove(particles)
+      pGeo.dispose()
+      pMat.dispose()
       scene.clear()
+
       renderer.dispose()
-      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement)
+      if (el.contains(renderer.domElement)) {
+        el.removeChild(renderer.domElement)
+      }
     }
   }, [mountRef])
 }
 
-// --- Components and Logic ---
-
-const scheduleData = {
-  'seg': [
-    { time: '06:00', class: 'Spinning', trainer: 'Roberto', intensity: 'Alta' },
-    { time: '07:00', class: 'Yoga', trainer: 'Ana', intensity: 'Baixa' },
-    { time: '18:00', class: 'Musculação (Grupo)', trainer: 'Carlos', intensity: 'Média' },
-    { time: '19:00', class: 'HIIT', trainer: 'Roberto', intensity: 'Alta' },
-    { time: '20:00', class: 'Zumba', trainer: 'Mariana', intensity: 'Média' }
-  ],
-  'ter': [
-    { time: '06:30', class: 'Cross Training', trainer: 'Roberto', intensity: 'Alta' },
-    { time: '08:00', class: 'Pilates', trainer: 'Ana', intensity: 'Baixa' },
-    { time: '18:30', class: 'Boxe', trainer: 'Paulo', intensity: 'Alta' },
-    { time: '19:30', class: 'Spinning', trainer: 'Mariana', intensity: 'Alta' }
-  ],
-  'qua': [
-    { time: '06:00', class: 'Yoga Flow', trainer: 'Ana', intensity: 'Baixa' },
-    { time: '07:00', class: 'Funcional', trainer: 'Carlos', intensity: 'Média' },
-    { time: '18:00', class: 'HIIT Extreme', trainer: 'Roberto', intensity: 'Alta' },
-    { time: '19:00', class: 'Gap', trainer: 'Mariana', intensity: 'Média' }
-  ],
-  'qui': [
-    { time: '06:30', class: 'Boxe', trainer: 'Paulo', intensity: 'Alta' },
-    { time: '08:00', class: 'Alongamento', trainer: 'Ana', intensity: 'Baixa' },
-    { time: '18:30', class: 'Cross Training', trainer: 'Roberto', intensity: 'Alta' },
-    { time: '20:00', class: 'Fit Dance', trainer: 'Mariana', intensity: 'Média' }
-  ],
-  'sex': [
-    { time: '06:00', class: 'Spinning', trainer: 'Mariana', intensity: 'Alta' },
-    { time: '17:00', class: 'Happy Hour Yoga', trainer: 'Ana', intensity: 'Baixa' },
-    { time: '18:00', class: 'Circuito', trainer: 'Carlos', intensity: 'Alta' }
-  ]
-};
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function NexusPage() {
-  const [activeTab, setActiveTab] = useState('seg');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isYearly, setIsYearly] = useState(false);
-  const threeRef = useRef<HTMLDivElement>(null);
-  useEnergyNetwork(threeRef);
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
-  const [bmiResult, setBmiResult] = useState({ value: '--', status: 'Seu Resultado', advice: 'Preencha os dados ao lado.', color: '' });
+  const [scrolled, setScrolled] = useState(false)
+  const mountRef = useRef<HTMLDivElement>(null)
 
-  const calculateBMI = () => {
-    const h = parseFloat(height) / 100;
-    const w = parseFloat(weight);
+  useGymScene(mountRef)
 
-    if (!h || !w) {
-      alert("Por favor, preencha altura e peso.");
-      return;
-    }
-
-    const bmi = (w / (h * h)).toFixed(1);
-    const bmiVal = parseFloat(bmi);
-
-    let status = "";
-    let advice = "";
-    let color = "";
-
-    if (bmiVal < 18.5) {
-      status = "Abaixo do Peso";
-      color = "blue";
-      advice = "Foco em nutrição e ganho de massa muscular (Hipertrofia).";
-    } else if (bmiVal < 24.9) {
-      status = "Peso Normal";
-      color = "green";
-      advice = "Mantenha o ritmo! Explore Cross Training ou Yoga.";
-    } else if (bmiVal < 29.9) {
-      status = "Sobrepeso";
-      color = "yellow";
-      advice = "Que tal HIIT e Cardio para queimar calorias?";
-    } else {
-      status = "Obesidade";
-      color = "red";
-      advice = "Nossos treinadores podem criar um plano seguro para você.";
-    }
-
-    setBmiResult({ value: bmi, status, advice, color });
-  };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
     <Container>
-      <Nav>
-        <NavContainer>
-          <Logo>
-            <span className="material-symbols-outlined icon">fitness_center</span>
-            NEXUS<span>FIT</span>
-          </Logo>
+      <Nav $scrolled={scrolled}>
+        <NavInner>
+          <NavLogo>V<em>.</em>IJALES</NavLogo>
           <NavLinks>
-            <NavLink href="#modalidades">Modalidades</NavLink>
-            <NavLink href="#schedule">Horários</NavLink>
-            <NavLink href="#trainers">Treinadores</NavLink>
-            <NavLink href="#calculator">IMC</NavLink>
-            <NavLink href="#plans">Planos</NavLink>
-            <BtnPrimary href="#contact" as="a">Matricule-se</BtnPrimary>
+            <NavLink href="#features">Features</NavLink>
+            <NavLink href="#design">Design</NavLink>
+            <BackLink href="/#portfolio">← Portfólio</BackLink>
           </NavLinks>
-          <MobileMenuBtn onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            <span className="material-symbols-outlined">menu</span>
-          </MobileMenuBtn>
-        </NavContainer>
-        <MobileMenu $isOpen={isMenuOpen}>
-          <div style={{ padding: '0.5rem 0.5rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-            <NavLink href="#modalidades" onClick={() => setIsMenuOpen(false)}>Modalidades</NavLink>
-            <NavLink href="#schedule" onClick={() => setIsMenuOpen(false)}>Horários</NavLink>
-            <NavLink href="#trainers" onClick={() => setIsMenuOpen(false)}>Treinadores</NavLink>
-            <NavLink href="#plans" onClick={() => setIsMenuOpen(false)}>Planos</NavLink>
-            <NavLink href="#contact" style={{ color: '#a3e635', fontWeight: 'bold' }} onClick={() => setIsMenuOpen(false)}>Matricule-se Agora</NavLink>
-          </div>
-        </MobileMenu>
+        </NavInner>
       </Nav>
 
       <Hero>
-        <HeroBg>
-          <img src="/assets/nexus/hero.png" alt="Gym Background" />
-          <div className="gradient"></div>
-        </HeroBg>
-        <ThreeMount ref={threeRef} aria-hidden="true" />
+        <ThreeMount ref={mountRef} aria-hidden="true" />
+        <HeroOverlay />
         <HeroContent>
-          <Badge>A Revolução Fitness Chegou</Badge>
-          <Title>
-            SUPERE SEUS <br />
-            <span>LIMITES</span>
-          </Title>
-          <Description>
-            Equipamentos de ponta, treinadores de elite e uma comunidade que te impulsiona. Sua melhor versão começa aqui na Nexus Fit.
-          </Description>
-          <HeroActions>
-            <LargeBtn href="#plans">Começar Agora</LargeBtn>
-            <SecondaryBtn href="#modalidades">Explorar Aulas</SecondaryBtn>
-          </HeroActions>
+          <HeroBadge>Template Web · Academia & Fitness</HeroBadge>
+          <HeroTitle>
+            Nexus<br />
+            <span className="indigo">Fitness</span><br />
+            <span className="cyan">Club</span>
+          </HeroTitle>
+          <HeroSub>
+            Landing page de alto impacto para academias — do catálogo de
+            modalidades à grade de horários — desenvolvida para converter
+            visitantes em alunos.
+          </HeroSub>
+          <HeroStats>
+            <Stat>
+              <span className="value">6</span>
+              <span className="label">Modalidades</span>
+            </Stat>
+            <Stat>
+              <span className="value">3</span>
+              <span className="label">Planos</span>
+            </Stat>
+            <Stat>
+              <span className="value">100%</span>
+              <span className="label">Responsivo</span>
+            </Stat>
+          </HeroStats>
         </HeroContent>
-        <StatsStrip>
-          <div>
-            <span className="stat-val">2000+</span>
-            <span className="stat-label">m² de Espaço</span>
-          </div>
-          <div>
-            <span className="stat-val">50+</span>
-            <span className="stat-label">Equipamentos Pro</span>
-          </div>
-          <div>
-            <span className="stat-val">30+</span>
-            <span className="stat-label">Aulas Semanais</span>
-          </div>
-          <div>
-            <span className="stat-val">24h</span>
-            <span className="stat-label">Acesso Total</span>
-          </div>
-        </StatsStrip>
+        <ScrollHint>scroll</ScrollHint>
       </Hero>
 
-      <Section id="modalidades">
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
-          <SectionHeader>
-            <h2>Modalidades Premium</h2>
-            <div className="divider"></div>
-            <p>Escolha como você quer suar hoje.</p>
-          </SectionHeader>
-          <FeaturesGrid>
-            {[
-              { title: 'Musculação', img: 'feature_musculacao.png', icon: 'fitness_center', desc: 'Área completa com pesos livres e máquinas de última geração para hipertrofia e força.' },
-              { title: 'Yoga & Pilates', img: 'feature_yoga.png', icon: 'self_improvement', desc: 'Conecte corpo e mente em nossas aulas focadas em flexibilidade, core e respiração.' },
-              { title: 'Cross Training', img: 'feature_cross.png', icon: 'bolt', desc: 'Treinos funcionais de alta intensidade para queimar calorias e desafiar seus limites.' },
-              { title: 'Boxe', img: 'feature_boxe.png', icon: 'sports_mma', desc: 'Aprenda técnicas de combate e melhore seu condicionamento cardiovascular.' },
-              { title: 'Cardio Zone', img: 'feature_cardio.png', icon: 'directions_run', desc: 'Esteiras, elípticos e bikes com tecnologia integrada para monitorar seu desempenho.' },
-              { title: 'Spinning', img: 'feature_spinning.png', icon: 'pedal_bike', desc: 'Pedale ao ritmo da música em uma experiência imersiva e motivadora.' },
-            ].map((f, i) => (
-              <FeatureCard key={i}>
-                <img src={`/assets/nexus/${f.img}`} alt={f.title} />
-                <div className="overlay">
-                  <div className="content">
-                    <h3><span className="material-symbols-outlined icon">{f.icon}</span> {f.title}</h3>
-                    <p className="description">{f.desc}</p>
-                  </div>
-                </div>
-              </FeatureCard>
+      <SectionWrap>
+        <OverviewGrid>
+          <OverviewText>
+            <SectionLabel>Sobre o Projeto</SectionLabel>
+            <SectionTitle>Uma academia que converte</SectionTitle>
+            <SectionDivider />
+            <p>
+              O <strong>Nexus Fitness Club</strong> é um template web completo
+              para academias e estúdios de fitness que precisam de uma presença
+              digital profissional e orientada à conversão. Cada seção foi
+              projetada para conduzir o visitante do interesse à matrícula.
+            </p>
+            <p>
+              O design segue uma paleta escura com accents em índigo e azul,
+              criando uma identidade visual moderna, energética e confiante.
+              A navegação é fluida e as seções são construídas para guiar a
+              jornada do usuário de forma intuitiva.
+            </p>
+            <p>
+              O objetivo é claro: <strong>apresentar as modalidades, mostrar
+              os planos e facilitar o primeiro contato</strong> — tudo em
+              uma única página de alta performance.
+            </p>
+          </OverviewText>
+          <Screenshot>
+            <img src="/assets/main/nexus_fit.png" alt="Screenshot do Nexus Fitness Club" />
+          </Screenshot>
+        </OverviewGrid>
+      </SectionWrap>
+
+      <SectionWrap id="features">
+        <SectionLabel>Funcionalidades</SectionLabel>
+        <SectionTitle>O que o template entrega</SectionTitle>
+        <SectionDivider />
+        <FeaturesGrid>
+          {FEATURES.map(f => (
+            <FeatureCard key={f.title}>
+              <span className="icon">{f.icon}</span>
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </FeatureCard>
+          ))}
+        </FeaturesGrid>
+      </SectionWrap>
+
+      <SectionWrap id="design">
+        <SectionLabel>Design & UX</SectionLabel>
+        <SectionTitle>Construído para converter</SectionTitle>
+        <SectionDivider />
+        <ArchGrid>
+          <ArchBlock>
+            <h3>Layout & Componentes</h3>
+            <ArchList>
+              {ARCH_DESIGN.map(item => (
+                <ArchItem key={item}>{item}</ArchItem>
+              ))}
+            </ArchList>
+          </ArchBlock>
+          <ArchBlock>
+            <h3>UX & Conversão</h3>
+            <ArchList>
+              {ARCH_UX.map(item => (
+                <ArchItem key={item}>{item}</ArchItem>
+              ))}
+            </ArchList>
+          </ArchBlock>
+        </ArchGrid>
+      </SectionWrap>
+
+      <TechWrap>
+        <TechInner>
+          <SectionLabel>Stack Tecnológico</SectionLabel>
+          <SectionTitle>Tecnologias utilizadas</SectionTitle>
+          <SectionDivider />
+          <TechGrid>
+            {TECH.map(t => (
+              <TechBadge key={t.label} $cyan={t.cyan}>{t.label}</TechBadge>
             ))}
-          </FeaturesGrid>
-        </div>
-      </Section>
+          </TechGrid>
+        </TechInner>
+      </TechWrap>
 
-      <ScheduleSection id="schedule">
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
-          <SectionHeader>
-            <h2>Horário das Aulas</h2>
-          </SectionHeader>
-          <TabsContainer>
-            {['seg', 'ter', 'qua', 'qui', 'sex'].map(day => (
-              <TabButton
-                key={day}
-                $active={activeTab === day}
-                onClick={() => setActiveTab(day)}
-              >
-                {day.charAt(0).toUpperCase() + day.slice(1)}da
-              </TabButton>
-            ))}
-          </TabsContainer>
-          <ScheduleList>
-            {scheduleData[activeTab as keyof typeof scheduleData]?.map((c, i) => (
-              <ScheduleItem key={i}>
-                <div className="info">
-                  <span className="time">{c.time}</span>
-                  <div>
-                    <h4>{c.class}</h4>
-                    <p className="trainer">Prof. {c.trainer}</p>
-                  </div>
-                </div>
-                <span className={`intensity ${c.intensity === 'Alta' ? 'high' : c.intensity === 'Baixa' ? 'low' : 'medium'}`}>
-                  Intensidade: {c.intensity}
-                </span>
-              </ScheduleItem>
-            ))}
-          </ScheduleList>
-        </div>
-      </ScheduleSection>
-
-      <Section id="trainers">
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
-          <SectionHeader>
-            <h2>Conheça Seus Treinadores</h2>
-          </SectionHeader>
-          <TrainersGrid>
-            {[
-              { name: 'Carlos Mendes', role: 'Espec. Hipertrofia', img: 'carlos.png', quote: '"O único treino ruim é aquele que não aconteceu."' },
-              { name: 'Ana Souza', role: 'Yoga & Funcional', img: 'ana.png', quote: '"Equilíbrio é a chave para uma vida longa e saudável."' },
-              { name: 'Roberto Silva', role: 'Cross Training', img: 'roberto.png', quote: '"Se não te desafia, não te transforma. Vamos lá!"' },
-            ].map((t, i) => (
-              <TrainerCard key={i}>
-                <div className="img-container">
-                  <img src={`/assets/nexus/${t.img}`} alt={t.name} />
-                  <div className="overlay">
-                    <h3>{t.name}</h3>
-                    <span className="specialty">{t.role}</span>
-                  </div>
-                </div>
-                <div className="details">
-                  <p>{t.quote}</p>
-                  <div className="social">
-                    <span className="material-symbols-outlined icon">alternate_email</span>
-                  </div>
-                </div>
-              </TrainerCard>
-            ))}
-          </TrainersGrid>
-        </div>
-      </Section>
-
-      <CalculatorSection id="calculator">
-        <div className="glow"></div>
-        <CalculatorContainer>
-          <CalculatorBox>
-            <div className="form-container">
-              <h2 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: 'white', marginBottom: '1rem' }}>Calculadora de IMC</h2>
-              <p style={{ color: '#94a3b8', marginBottom: '1.5rem' }}>Descubra seu Índice de Massa Corporal e veja qual plano de treino se adapta melhor aos seus objetivos.</p>
-              <InputGroup>
-                <label>Altura (cm)</label>
-                <input type="number" placeholder="Ex: 175" value={height} onChange={e => setHeight(e.target.value)} />
-              </InputGroup>
-              <InputGroup>
-                <label>Peso (kg)</label>
-                <input type="number" placeholder="Ex: 70" value={weight} onChange={e => setWeight(e.target.value)} />
-              </InputGroup>
-              <CalculatorBtn onClick={calculateBMI}>Calcular Agora</CalculatorBtn>
-            </div>
-            <div className="result-container">
-              <BmiCircle className={bmiResult.color}>
-                <span>{bmiResult.value}</span>
-              </BmiCircle>
-              <p style={{ fontSize: '1.25rem', fontWeight: '600', color: 'white' }}>{bmiResult.status}</p>
-              <p style={{ fontSize: '0.875rem', textAlign: 'center', color: '#94a3b8', marginTop: '0.5rem' }}>{bmiResult.advice}</p>
-            </div>
-          </CalculatorBox>
-        </CalculatorContainer>
-      </CalculatorSection>
-
-      <Section id="plans">
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 1rem' }}>
-          <SectionHeader>
-            <h2>Planos Flexíveis</h2>
-            <p>Sem taxas de cancelamento. Mude quando quiser.</p>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: '2rem', gap: '1rem' }}>
-              <span style={{ color: '#cbd5e1', fontWeight: '500' }}>Mensal</span>
-              <div
-                onClick={() => setIsYearly(!isYearly)}
-                style={{ width: '3.5rem', height: '1.75rem', backgroundColor: '#334155', borderRadius: '9999px', position: 'relative', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                className={isYearly ? 'bg-lime-500' : ''}
-              >
-                <div style={{
-                  width: '1.5rem',
-                  height: '1.5rem',
-                  backgroundColor: 'white',
-                  borderRadius: '9999px',
-                  position: 'absolute',
-                  top: '0.125rem',
-                  left: isYearly ? '1.875rem' : '0.125rem',
-                  transition: 'all 0.2s'
-                }}></div>
-              </div>
-              <span style={{ color: 'white', fontWeight: 'bold' }}>Anual <span style={{ fontSize: '0.75rem', color: '#a3e635', marginLeft: '0.25rem' }}>-20% OFF</span></span>
-            </div>
-          </SectionHeader>
-          <PlansGrid>
-            <PlanCard>
-              <h3>Essential</h3>
-              <p className="subtitle">Para quem está começando.</p>
-              <div className="price">
-                <span className="val">{isYearly ? 'R$ 70' : 'R$ 89'}</span>
-                <span className="period">/mês</span>
-              </div>
-              <ul>
-                <li><span className="material-symbols-outlined icon">check</span> Acesso à musculação</li>
-                <li><span className="material-symbols-outlined icon">check</span> Acesso Cardio</li>
-                <li><span className="material-symbols-outlined icon">check</span> Vestiários</li>
-              </ul>
-              <PlanBtn>Escolher Essential</PlanBtn>
-            </PlanCard>
-
-            <PlanCard $featured>
-              <div className="popular-tag">POPULAR</div>
-              <h3>Performance</h3>
-              <p className="subtitle">O melhor custo-benefício.</p>
-              <div className="price">
-                <span className="val">{isYearly ? 'R$ 99' : 'R$ 129'}</span>
-                <span className="period">/mês</span>
-              </div>
-              <ul>
-                <li><span className="material-symbols-outlined icon">check_circle</span> Tudo do Essential</li>
-                <li><span className="material-symbols-outlined icon">check_circle</span> Aulas Coletivas (Yoga, Zumba)</li>
-                <li><span className="material-symbols-outlined icon">check_circle</span> App de Treino</li>
-                <li><span className="material-symbols-outlined icon">check_circle</span> Direito a 1 convidado/mês</li>
-              </ul>
-              <PlanBtn $featured>Escolher Performance</PlanBtn>
-            </PlanCard>
-
-            <PlanCard>
-              <h3>Ultimate</h3>
-              <p className="subtitle">Resultados acelerados.</p>
-              <div className="price">
-                <span className="val">{isYearly ? 'R$ 159' : 'R$ 199'}</span>
-                <span className="period">/mês</span>
-              </div>
-              <ul>
-                <li><span className="material-symbols-outlined icon">check</span> Tudo do Performance</li>
-                <li><span className="material-symbols-outlined icon">check</span> Acompanhamento Nutricional</li>
-                <li><span className="material-symbols-outlined icon">check</span> Bioimpedância mensal</li>
-                <li><span className="material-symbols-outlined icon">check</span> Kit Exclusivo Nexus</li>
-              </ul>
-              <PlanBtn>Escolher Ultimate</PlanBtn>
-            </PlanCard>
-          </PlansGrid>
-        </div>
-      </Section>
-
-      <div id="contact">
-        <ContactGrid>
-          <FormPane>
-            <h2>Comece Sua Jornada</h2>
-            <p>Preencha o formulário e ganhe 3 dias de acesso grátis (Free Pass) para conhecer a Nexus Fit.</p>
-            <form onSubmit={e => { e.preventDefault(); alert('Obrigado! Entraremos em contato em breve.'); }}>
-              <input type="text" placeholder="Seu Nome" required />
-              <input type="email" placeholder="Seu Email" required />
-              <input type="tel" placeholder="WhatsApp" />
-              <CalculatorBtn type="submit" style={{ padding: '1rem' }}>Garantir Free Pass</CalculatorBtn>
-            </form>
-            <div className="form-footer">
-              <div className="item">
-                <span className="material-symbols-outlined icon">phone</span> (11) 99999-0000
-              </div>
-              <div className="item">
-                <span className="material-symbols-outlined icon">location_on</span> Av. Paulista, 1000
-              </div>
-            </div>
-          </FormPane>
-          <MapPane />
-        </ContactGrid>
-      </div>
+      <CTASection>
+        <SectionLabel>Próximo Passo</SectionLabel>
+        <CTATitle>
+          Quer ver o projeto<br />
+          <span>em ação?</span>
+        </CTATitle>
+        <CTASub>
+          Acesse o template completo e navegue pela experiência real —
+          ou fale com a gente para desenvolver uma solução personalizada
+          para a sua academia.
+        </CTASub>
+        <CTAButtons>
+          <CTABtn href="/portifolio/nexus/site">Ver o projeto →</CTABtn>
+          <CTABtnOutline href="/#contact">Fale com a gente</CTABtnOutline>
+        </CTAButtons>
+      </CTASection>
 
       <Footer>
-        <div className="footer-container">
-          <Logo style={{ fontSize: '1.25rem' }}>
-            <span className="material-symbols-outlined icon" style={{ fontSize: '1.5rem' }}>fitness_center</span>
-            NEXUS<span>FIT</span>
-          </Logo>
-          <div className="copy-right">
-            <p>© 2023 Nexus Fitness. Todos os direitos reservados.</p>
-            <p style={{ marginTop: '0.25rem', color: '#475569' }}>Imagens meramente ilustrativas.</p>
-          </div>
-        </div>
+        <FooterBack href="/#portfolio">← Voltar ao portfólio</FooterBack>
       </Footer>
     </Container>
   )
