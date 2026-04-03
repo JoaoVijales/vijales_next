@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styled, { keyframes } from 'styled-components'
+import * as THREE from 'three'
 
 // --- Animations ---
 
@@ -945,6 +946,13 @@ const MapPane = styled.div`
   /* Placeholder for map if needed */
 `;
 
+const ThreeMount = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+`;
+
 const Footer = styled.footer`
   background-color: #020617;
   color: #94a3b8;
@@ -975,6 +983,139 @@ const Footer = styled.footer`
     }
   }
 `;
+
+// ─── Three.js Energy Network ──────────────────────────────────────────────────
+
+function useEnergyNetwork(mountRef: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = mountRef.current
+    if (!el) return
+
+    const scene = new THREE.Scene()
+
+    const camera = new THREE.PerspectiveCamera(70, el.clientWidth / el.clientHeight, 0.1, 300)
+    camera.position.set(0, 0, 60)
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    renderer.setSize(el.clientWidth, el.clientHeight)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    el.appendChild(renderer.domElement)
+
+    // ── Nodes ──
+    const LIME  = new THREE.Color(0xa3e635)
+    const TEAL  = new THREE.Color(0x10b981)
+    const NODE_COUNT = 60
+
+    const nodePositions: THREE.Vector3[] = []
+    const nodeMeshes: THREE.Mesh[] = []
+    const nodeGeo = new THREE.SphereGeometry(0.35, 8, 8)
+
+    for (let i = 0; i < NODE_COUNT; i++) {
+      const x = (Math.random() - 0.5) * 90
+      const y = (Math.random() - 0.5) * 55
+      const z = (Math.random() - 0.5) * 30
+      const pos = new THREE.Vector3(x, y, z)
+      nodePositions.push(pos)
+
+      const mat = new THREE.MeshBasicMaterial({
+        color: Math.random() > 0.4 ? LIME : TEAL,
+        transparent: true,
+        opacity: 0.6 + Math.random() * 0.4,
+      })
+      const mesh = new THREE.Mesh(nodeGeo, mat)
+      mesh.position.copy(pos)
+      scene.add(mesh)
+      nodeMeshes.push(mesh)
+    }
+
+    // ── Edges (connect nearby nodes) ──
+    const edgePositions: number[] = []
+    const CONNECTION_DIST = 22
+
+    for (let i = 0; i < NODE_COUNT; i++) {
+      for (let j = i + 1; j < NODE_COUNT; j++) {
+        if (nodePositions[i].distanceTo(nodePositions[j]) < CONNECTION_DIST) {
+          edgePositions.push(
+            nodePositions[i].x, nodePositions[i].y, nodePositions[i].z,
+            nodePositions[j].x, nodePositions[j].y, nodePositions[j].z,
+          )
+        }
+      }
+    }
+
+    const edgeGeo = new THREE.BufferGeometry()
+    edgeGeo.setAttribute('position', new THREE.Float32BufferAttribute(edgePositions, 3))
+    const edgeMat = new THREE.LineBasicMaterial({
+      color: 0xa3e635,
+      transparent: true,
+      opacity: 0.12,
+      blending: THREE.AdditiveBlending,
+    })
+    const edges = new THREE.LineSegments(edgeGeo, edgeMat)
+    scene.add(edges)
+
+    // ── Mouse ──
+    let mouseX = 0
+    let mouseY = 0
+    const onMouseMove = (e: MouseEvent) => {
+      mouseX = (e.clientX / window.innerWidth)  * 2 - 1
+      mouseY = (e.clientY / window.innerHeight) * 2 - 1
+    }
+    document.addEventListener('mousemove', onMouseMove)
+
+    // ── Resize ──
+    const onResize = () => {
+      if (!el) return
+      camera.aspect = el.clientWidth / el.clientHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(el.clientWidth, el.clientHeight)
+    }
+    window.addEventListener('resize', onResize)
+
+    // ── Animate ──
+    let frameId: number
+    let t = 0
+
+    const animate = () => {
+      frameId = requestAnimationFrame(animate)
+      t += 0.008
+
+      // Drift nodes gently
+      nodeMeshes.forEach((mesh, i) => {
+        const mat = mesh.material as THREE.MeshBasicMaterial
+        mat.opacity = 0.4 + Math.abs(Math.sin(t + i * 0.4)) * 0.6
+        mesh.position.y = nodePositions[i].y + Math.sin(t * 0.5 + i) * 0.8
+      })
+
+      scene.rotation.y = mouseX * 0.06 + t * 0.015
+      scene.rotation.x = mouseY * 0.04
+
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    // ── Cleanup ──
+    return () => {
+      cancelAnimationFrame(frameId)
+      document.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('resize', onResize)
+
+      nodeMeshes.forEach(m => {
+        scene.remove(m)
+        ;(m.material as THREE.Material).dispose()
+      })
+      nodeGeo.dispose()
+
+      scene.remove(edges)
+      edgeGeo.dispose()
+      edgeMat.dispose()
+
+      scene.clear()
+      renderer.dispose()
+      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement)
+    }
+  }, [mountRef])
+}
 
 // --- Components and Logic ---
 
@@ -1015,6 +1156,8 @@ export default function NexusPage() {
   const [activeTab, setActiveTab] = useState('seg');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isYearly, setIsYearly] = useState(false);
+  const threeRef = useRef<HTMLDivElement>(null);
+  useEnergyNetwork(threeRef);
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
   const [bmiResult, setBmiResult] = useState({ value: '--', status: 'Seu Resultado', advice: 'Preencha os dados ao lado.', color: '' });
@@ -1092,6 +1235,7 @@ export default function NexusPage() {
           <img src="/assets/nexus/hero.png" alt="Gym Background" />
           <div className="gradient"></div>
         </HeroBg>
+        <ThreeMount ref={threeRef} aria-hidden="true" />
         <HeroContent>
           <Badge>A Revolução Fitness Chegou</Badge>
           <Title>
