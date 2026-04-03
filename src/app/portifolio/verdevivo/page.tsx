@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import styled, { keyframes } from 'styled-components'
+import * as THREE from 'three'
 
 // --- Animations ---
 
@@ -682,6 +683,13 @@ input, select, textarea {
     box-shadow: 0 20px 25px-5px rgba(16, 185, 129, 0.4);}}
 `;
 
+const ThreeMount = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+`;
+
 const Footer = styled.footer`
 background-color: #1c1917;
 color: #a8a29e;
@@ -709,6 +717,140 @@ border-top: 1px solid #292524;
 a:hover { color: #10b981;}
 `;
 
+// ─── Three.js Pollen Rising ───────────────────────────────────────────────────
+
+function usePollenScene(mountRef: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = mountRef.current
+    if (!el) return
+
+    const scene = new THREE.Scene()
+
+    const camera = new THREE.PerspectiveCamera(65, el.clientWidth / el.clientHeight, 0.1, 300)
+    camera.position.set(0, 0, 55)
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
+    renderer.setSize(el.clientWidth, el.clientHeight)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    el.appendChild(renderer.domElement)
+
+    // ── Particle system ──
+    const PARTICLE_COUNT = 1200
+    const positions   = new Float32Array(PARTICLE_COUNT * 3)
+    const velocities  = new Float32Array(PARTICLE_COUNT)   // vertical speed per particle
+    const offsets     = new Float32Array(PARTICLE_COUNT)   // horizontal sway offset
+    const colors      = new Float32Array(PARTICLE_COUNT * 3)
+
+    const GREENS = [
+      new THREE.Color(0x059669),
+      new THREE.Color(0x10b981),
+      new THREE.Color(0x34d399),
+      new THREE.Color(0x6ee7b7),
+      new THREE.Color(0xffffff),
+    ]
+
+    const SPREAD_X = 80
+    const SPREAD_Y = 70
+    const SPREAD_Z = 40
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      positions[i * 3]     = (Math.random() - 0.5) * SPREAD_X
+      positions[i * 3 + 1] = (Math.random() - 0.5) * SPREAD_Y
+      positions[i * 3 + 2] = (Math.random() - 0.5) * SPREAD_Z
+
+      velocities[i] = 0.015 + Math.random() * 0.04
+      offsets[i]    = Math.random() * Math.PI * 2
+
+      const c = GREENS[Math.floor(Math.random() * GREENS.length)]
+      colors[i * 3]     = c.r
+      colors[i * 3 + 1] = c.g
+      colors[i * 3 + 2] = c.b
+    }
+
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    geo.setAttribute('color',    new THREE.BufferAttribute(colors,    3))
+
+    const mat = new THREE.PointsMaterial({
+      size: 0.5,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.55,
+      blending: THREE.AdditiveBlending,
+      sizeAttenuation: true,
+    })
+
+    const points = new THREE.Points(geo, mat)
+    scene.add(points)
+
+    // ── Mouse parallax ──
+    let mouseX = 0
+    let mouseY = 0
+    const onMouseMove = (e: MouseEvent) => {
+      mouseX = (e.clientX / window.innerWidth)  * 2 - 1
+      mouseY = (e.clientY / window.innerHeight) * 2 - 1
+    }
+    document.addEventListener('mousemove', onMouseMove)
+
+    // ── Resize ──
+    const onResize = () => {
+      if (!el) return
+      camera.aspect = el.clientWidth / el.clientHeight
+      camera.updateProjectionMatrix()
+      renderer.setSize(el.clientWidth, el.clientHeight)
+    }
+    window.addEventListener('resize', onResize)
+
+    // ── Animate ──
+    let frameId: number
+    let t = 0
+    const posAttr = geo.attributes.position as THREE.BufferAttribute
+
+    const animate = () => {
+      frameId = requestAnimationFrame(animate)
+      t += 0.01
+
+      const arr = posAttr.array as Float32Array
+
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        // Rise
+        arr[i * 3 + 1] += velocities[i]
+        // Sway
+        arr[i * 3]     += Math.sin(t + offsets[i]) * 0.008
+
+        // Wrap around top
+        if (arr[i * 3 + 1] > SPREAD_Y / 2) {
+          arr[i * 3 + 1] = -SPREAD_Y / 2
+          arr[i * 3]      = (Math.random() - 0.5) * SPREAD_X
+        }
+      }
+      posAttr.needsUpdate = true
+
+      // Subtle parallax
+      scene.rotation.y = mouseX * 0.04
+      scene.rotation.x = mouseY * 0.02
+
+      renderer.render(scene, camera)
+    }
+    animate()
+
+    // ── Cleanup ──
+    return () => {
+      cancelAnimationFrame(frameId)
+      document.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('resize', onResize)
+
+      scene.remove(points)
+      geo.dispose()
+      mat.dispose()
+      scene.clear()
+
+      renderer.dispose()
+      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement)
+    }
+  }, [mountRef])
+}
+
 // --- Data ---
 
 const stylesData = {
@@ -735,6 +877,8 @@ const stylesData = {
 export default function VerdeVivoPage() {
   const [scrolled, setScrolled] = useState(false);
   const [activeStyle, setActiveStyle] = useState('tropical');
+  const threeRef = useRef<HTMLDivElement>(null);
+  usePollenScene(threeRef);
   const [previewOpacity, setPreviewOpacity] = useState(1);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -789,6 +933,7 @@ export default function VerdeVivoPage() {
           <img src="/assets/verdevivo/hero.png" alt="Jardim Luxuoso" />
           <div className="gradient"></div>
         </HeroBg>
+        <ThreeMount ref={threeRef} aria-hidden="true" />
         <HeroContent>
           <HeroBadge>Design Biofílico & Paisagismo</HeroBadge>
           <HeroTitle>
