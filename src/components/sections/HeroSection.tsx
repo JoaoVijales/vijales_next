@@ -1,8 +1,27 @@
 'use client'
 
 import React, { useRef } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { useSVGAnimate } from '@/hooks/useSVGAnimate'
+
+const glitchText = keyframes`
+  0%, 94%, 100% {
+    transform: translate(0);
+    opacity: 0;
+  }
+  95% {
+    transform: translate(4px, -4px);
+    opacity: 0.5;
+  }
+  96% {
+    transform: translate(-4px, 4px);
+    opacity: 0.5;
+  }
+  97% {
+    transform: translate(2px, -2px);
+    opacity: 0.5;
+  }
+`
 
 const HeroWrapper = styled.section`
   text-align: center;
@@ -65,7 +84,7 @@ const Title = styled.h1`
     width: 100%;
     color: #ff4500;
     z-index: -1;
-    animation: glitchText 5s infinite;
+    animation: ${glitchText} 5s infinite;
   }
 `;
 
@@ -150,7 +169,6 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ isActive = false }: HeroSectionProps) {
-  // const [ref, isVisible] = useIntersectionObserver(...) -> Replaced by isActive prop
   const svgRef = useRef<SVGSVGElement>(null)
 
   useSVGAnimate(svgRef, isActive)
@@ -230,7 +248,7 @@ export default function HeroSection({ isActive = false }: HeroSectionProps) {
       <Subtitle>
         Desenvolvemos o futuro. Arquitetamos soluções digitais que transcendem o código e transformam visões em realidade tecnológica.
       </Subtitle>
-      <CtaButton href="https://wa.me/5548998699159">
+      <CtaButton href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '5548988699159'}`}>
         <span>Entrar em contato</span>
       </CtaButton>
     </HeroWrapper>

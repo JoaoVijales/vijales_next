@@ -37,16 +37,11 @@ export function usePageScroll(sectionCount: number) {
         }
 
         const tilt = clamp(val / 5, -10, 10);
-        // Note: page.tsx handles the main transform. We are adding a temporary style.
-        // We must ensure we don't break the 'translate' logic.
-        // Page.tsx uses: translate3d(0,0,0) rotateX(0deg) for offset 0.
-        // So overwriting it here is safe IF offset is 0.
         el.style.transform = `translate3d(0, 0, 0) rotateX(${tilt * 3}deg)`;
     };
 
     const resetTilt = () => {
         const el = getCurrentSection();
-        // Restore default state for offset 0
         if (el) el.style.transform = '';
     }
 
@@ -139,10 +134,15 @@ export function usePageScroll(sectionCount: number) {
         return true;
     }, [activeSection, sectionCount]);
 
+    // Ref mantém sempre a versão mais atual de processMovement sem criar dependências
+    const processMovementRef = useRef(processMovement);
+    useEffect(() => { processMovementRef.current = processMovement }, [processMovement]);
+
+    // Handlers estáveis — delegam para o ref, nunca causam re-registro de listeners
     const handleWheel = useCallback((event: WheelEvent) => {
-        const shouldPrevent = processMovement(event.deltaY);
+        const shouldPrevent = processMovementRef.current(event.deltaY);
         if (shouldPrevent) event.preventDefault();
-    }, [processMovement]);
+    }, []);
 
     const handleTouchStart = useCallback((event: TouchEvent) => {
         touchStartY.current = event.touches[0].clientY;
@@ -154,36 +154,27 @@ export function usePageScroll(sectionCount: number) {
         const touchY = event.touches[0].clientY;
         const deltaY = touchStartY.current - touchY;
 
-        const shouldPrevent = processMovement(deltaY * 2.5);
+        const shouldPrevent = processMovementRef.current(deltaY * 2.5);
         if (shouldPrevent) event.preventDefault();
 
         touchStartY.current = touchY;
-    }, [processMovement]);
+    }, []);
 
     const handleTouchEnd = useCallback(() => {
         touchStartY.current = null;
-        // Optional: auto-snap or decay on release could go here, 
-        // but the interval in useEffect handles decay already.
     }, []);
 
     useEffect(() => {
-        const onWheel = (e: WheelEvent) => handleWheel(e);
-        const onTouchStart = (e: TouchEvent) => handleTouchStart(e);
-        const onTouchMove = (e: TouchEvent) => handleTouchMove(e);
-        const onTouchEnd = (e: TouchEvent) => handleTouchEnd();
-
-        window.addEventListener('wheel', onWheel, { passive: false });
-        window.addEventListener('touchstart', onTouchStart, { passive: false });
-        window.addEventListener('touchmove', onTouchMove, { passive: false });
-        window.addEventListener('touchend', onTouchEnd);
+        window.addEventListener('wheel', handleWheel, { passive: false });
+        window.addEventListener('touchstart', handleTouchStart, { passive: false });
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+        window.addEventListener('touchend', handleTouchEnd);
 
         // Decay/Reset accumulator if user stops scrolling without switching
         const interval = setInterval(() => {
             if (!isScrolling && Math.abs(scrollAccumulator.current) > 0) {
-                // Decay factor
                 scrollAccumulator.current *= 0.85;
 
-                // Snap to 0
                 if (Math.abs(scrollAccumulator.current) < 0.5) {
                     scrollAccumulator.current = 0;
                     resetTilt();
@@ -191,18 +182,18 @@ export function usePageScroll(sectionCount: number) {
                     applyTilt(scrollAccumulator.current);
                 }
             }
-        }, 30); // 60fps tick roughly
+        }, 30);
 
         return () => {
-            window.removeEventListener('wheel', onWheel);
-            window.removeEventListener('touchstart', onTouchStart);
-            window.removeEventListener('touchmove', onTouchMove);
-            window.removeEventListener('touchend', onTouchEnd);
+            window.removeEventListener('wheel', handleWheel);
+            window.removeEventListener('touchstart', handleTouchStart);
+            window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
             clearInterval(interval);
         }
     }, [handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd, isScrolling]);
 
-    // Safety: ensure tile is reset if active section changes
+    // Safety: ensure tilt is reset if active section changes
     useEffect(() => {
         resetTilt();
         scrollAccumulator.current = 0;

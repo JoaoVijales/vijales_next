@@ -14,13 +14,14 @@ export default function ThreeBackground() {
         let camera: THREE.PerspectiveCamera
         let renderer: THREE.WebGLRenderer
         let particles: THREE.Points
-        let gridRunners: GridRunner[] = []
+        let gridHelper: THREE.GridHelper
+        const gridRunners: GridRunner[] = []
 
         // Interaction State
         let mouseX = 0
         let mouseY = 0
         let scrollY = 0
-        let targetScrollY = 0
+        const targetScrollY = 0
         let scrollSpeed = 0
         let lastScrollTime = 0
         let animationFrameId: number
@@ -94,7 +95,7 @@ export default function ThreeBackground() {
                     this.pickNextTarget()
                 }
 
-                let currentSpeed = this.speed + extraSpeed
+                const currentSpeed = this.speed + extraSpeed
 
                 const direction = new THREE.Vector3().subVectors(this.targetPos, this.currentPos)
                 const dist = direction.length()
@@ -208,7 +209,7 @@ export default function ThreeBackground() {
         }
 
         const createGrid = () => {
-            const gridHelper = new THREE.GridHelper(5000, 100, 0xff4500, 0xff4500)
+            gridHelper = new THREE.GridHelper(5000, 100, 0xff4500, 0xff4500)
             if (gridHelper.material instanceof THREE.Material) {
                 gridHelper.material.transparent = true
                 gridHelper.material.opacity = 0.15
@@ -304,6 +305,26 @@ export default function ThreeBackground() {
             window.removeEventListener('resize', onWindowResize)
             document.removeEventListener('mousemove', onMouseMove)
 
+            if (particles) {
+                scene.remove(particles)
+                particles.geometry.dispose()
+                ;(particles.material as THREE.Material).dispose()
+            }
+
+            gridRunners.forEach(runner => {
+                scene.remove(runner.line)
+                runner.line.geometry.dispose()
+                ;(runner.line.material as THREE.Material).dispose()
+            })
+
+            if (gridHelper) {
+                scene.remove(gridHelper)
+                gridHelper.geometry.dispose()
+                ;(gridHelper.material as THREE.Material).dispose()
+            }
+
+            scene.clear()
+
             if (renderer) {
                 renderer.dispose()
                 if (mountRef.current && renderer.domElement.parentNode === mountRef.current) {
@@ -317,6 +338,7 @@ export default function ThreeBackground() {
         <div
             ref={mountRef}
             id="canvas-container"
+            aria-hidden="true"
             style={{
                 position: 'fixed',
                 top: 0,

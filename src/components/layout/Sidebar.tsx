@@ -33,7 +33,7 @@ const NavIndicator = styled.div`
   gap: 1.5rem;
 `
 
-const NavDot = styled.a<{ $active: boolean }>`
+const NavDot = styled.button<{ $active: boolean }>`
   width: 10px;
   height: 10px;
   border-radius: 50%;
@@ -42,6 +42,8 @@ const NavDot = styled.a<{ $active: boolean }>`
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
+  border: none;
+  padding: 0;
 
   &::after {
     content: attr(data-label);
@@ -113,10 +115,10 @@ export default function Sidebar({ activeIndex, onNavigate }: SidebarProps) {
   return (
     <SidebarWrapper>
       <SocialLinks>
-        <SocialIcon href="https://github.com" target="_blank" aria-label="GitHub">
+        <SocialIcon href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
           <Github size={20} />
         </SocialIcon>
-        <SocialIcon href="https://linkedin.com" target="_blank" aria-label="LinkedIn">
+        <SocialIcon href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
           <Linkedin size={20} />
         </SocialIcon>
       </SocialLinks>
@@ -127,13 +129,12 @@ export default function Sidebar({ activeIndex, onNavigate }: SidebarProps) {
         {sections.map((section, index) => (
           <NavDot
             key={section.id}
-            href={`#${section.id}`}
+            type="button"
             $active={activeIndex === index}
             data-label={section.label}
-            onClick={(e) => {
-              e.preventDefault();
-              onNavigate(index);
-            }}
+            aria-label={`Ir para ${section.label}`}
+            aria-current={activeIndex === index ? 'true' : undefined}
+            onClick={() => onNavigate(index)}
           />
         ))}
       </NavIndicator>
