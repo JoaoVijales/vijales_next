@@ -9,6 +9,10 @@ import { render } from '@testing-library/react'
 const mockGeometryDispose = jest.fn()
 const mockMaterialDispose = jest.fn()
 const mockRendererDispose = jest.fn()
+const mockGridHelperGeometryDispose = jest.fn()
+const mockGridHelperMaterialDispose = jest.fn()
+const mockSceneRemove = jest.fn()
+const mockSceneClear = jest.fn()
 
 jest.mock('three', () => {
   const actual = jest.requireActual('three')
@@ -56,6 +60,8 @@ jest.mock('three', () => {
   class MockScene {
     fog: unknown = null
     add = jest.fn()
+    remove = mockSceneRemove
+    clear = mockSceneClear
   }
 
   class MockPerspectiveCamera {
@@ -74,8 +80,10 @@ jest.mock('three', () => {
   }
 
   class MockFogExp2 {}
+
   class MockGridHelper {
-    material = { transparent: false, opacity: 1 }
+    geometry = { dispose: mockGridHelperGeometryDispose }
+    material = { transparent: false, opacity: 1, dispose: mockGridHelperMaterialDispose }
     position = { y: 0 }
   }
 
@@ -139,6 +147,10 @@ describe('ThreeBackground', () => {
     mockGeometryDispose.mockClear()
     mockMaterialDispose.mockClear()
     mockRendererDispose.mockClear()
+    mockGridHelperGeometryDispose.mockClear()
+    mockGridHelperMaterialDispose.mockClear()
+    mockSceneRemove.mockClear()
+    mockSceneClear.mockClear()
     jest.spyOn(window, 'requestAnimationFrame').mockImplementation(() => 0)
     jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {})
   })
@@ -168,5 +180,24 @@ describe('ThreeBackground', () => {
     const { unmount } = render(<ThreeBackground />)
     unmount()
     expect(mockRendererDispose).toHaveBeenCalled()
+  })
+
+  it('descarta geometria e material do GridHelper ao desmontar', () => {
+    const { unmount } = render(<ThreeBackground />)
+    unmount()
+    expect(mockGridHelperGeometryDispose).toHaveBeenCalledTimes(1)
+    expect(mockGridHelperMaterialDispose).toHaveBeenCalledTimes(1)
+  })
+
+  it('remove objetos da cena antes de descartar', () => {
+    const { unmount } = render(<ThreeBackground />)
+    unmount()
+    expect(mockSceneRemove).toHaveBeenCalled()
+  })
+
+  it('limpa a cena ao desmontar', () => {
+    const { unmount } = render(<ThreeBackground />)
+    unmount()
+    expect(mockSceneClear).toHaveBeenCalled()
   })
 })

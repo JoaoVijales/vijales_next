@@ -14,6 +14,7 @@ export default function ThreeBackground() {
         let camera: THREE.PerspectiveCamera
         let renderer: THREE.WebGLRenderer
         let particles: THREE.Points
+        let gridHelper: THREE.GridHelper
         let gridRunners: GridRunner[] = []
 
         // Interaction State
@@ -208,7 +209,7 @@ export default function ThreeBackground() {
         }
 
         const createGrid = () => {
-            const gridHelper = new THREE.GridHelper(5000, 100, 0xff4500, 0xff4500)
+            gridHelper = new THREE.GridHelper(5000, 100, 0xff4500, 0xff4500)
             if (gridHelper.material instanceof THREE.Material) {
                 gridHelper.material.transparent = true
                 gridHelper.material.opacity = 0.15
@@ -305,14 +306,24 @@ export default function ThreeBackground() {
             document.removeEventListener('mousemove', onMouseMove)
 
             if (particles) {
+                scene.remove(particles)
                 particles.geometry.dispose()
                 ;(particles.material as THREE.Material).dispose()
             }
 
             gridRunners.forEach(runner => {
+                scene.remove(runner.line)
                 runner.line.geometry.dispose()
                 ;(runner.line.material as THREE.Material).dispose()
             })
+
+            if (gridHelper) {
+                scene.remove(gridHelper)
+                gridHelper.geometry.dispose()
+                ;(gridHelper.material as THREE.Material).dispose()
+            }
+
+            scene.clear()
 
             if (renderer) {
                 renderer.dispose()
