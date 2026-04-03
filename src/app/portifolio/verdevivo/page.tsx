@@ -1,789 +1,744 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
 import * as THREE from 'three'
 
-// --- Animations ---
-
-const blob = keyframes`
-  0% { transform: translate(0px, 0px) scale(1);}
-  33% { transform: translate(30px, -50px) scale(1.1);}
-  66% { transform: translate(-20px, 20px) scale(0.9);}
-  100% { transform: translate(0px, 0px) scale(1);}
-`;
+// ─── Animations ───────────────────────────────────────────────────────────────
 
 const fadeInUp = keyframes`
-  from { opacity: 0; transform: translateY(20px);}
-  to { opacity: 1; transform: translateY(0);}
-`;
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+`
 
-const bounce = keyframes`
-  0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1);}
-  50% { transform: none; animation-timing-function: cubic-bezier(0, 0, 0.2, 1);}
-`;
+const glowPulse = keyframes`
+  0%, 100% { box-shadow: 0 0 20px rgba(5, 150, 105, 0.4); }
+  50%       { box-shadow: 0 0 50px rgba(5, 150, 105, 0.8), 0 0 100px rgba(5, 150, 105, 0.15); }
+`
 
-// --- Styled Components ---
+const lineDown = keyframes`
+  0%   { height: 0;    opacity: 1; }
+  100% { height: 50px; opacity: 0; }
+`
+
+const scanline = keyframes`
+  0%   { top: -2px; }
+  100% { top: 100%; }
+`
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
 
 const Container = styled.div`
-  background-color: #fafaf9;
-  color: #292524;
+  background: #000;
+  color: #fff;
   font-family: var(--font-montserrat), sans-serif;
-  scroll-behavior: smooth;
   overflow-x: hidden;
-  
-  &::selection {
-    background-color: #a7f3d0;
-    color: #064e3b;}
-`;
+`
+
+// ─── Nav ──────────────────────────────────────────────────────────────────────
 
 const Nav = styled.nav<{ $scrolled: boolean }>`
   position: fixed;
+  top: 0;
   width: 100%;
-  z-index: 50;
-  transition: all 0.3s ease-in-out;
-  background-color: ${props => props.$scrolled ? 'rgba(255, 255, 255, 0.9)' : 'transparent'};
-  backdrop-filter: ${props => props.$scrolled ? 'blur(12px)' : 'none'};
-  box-shadow: ${props => props.$scrolled ? '0 4px 6px -1px rgba(0, 0, 0, 0.1)' : 'none'};
-`;
+  z-index: 100;
+  transition: all 0.4s ease;
+  background:      ${p => p.$scrolled ? 'rgba(0,0,0,0.95)' : 'transparent'};
+  backdrop-filter: ${p => p.$scrolled ? 'blur(12px)'       : 'none'};
+  border-bottom:   ${p => p.$scrolled ? '1px solid rgba(5,150,105,0.2)' : 'none'};
+`
 
-const NavContainer = styled.div`
+const NavInner = styled.div`
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
   height: 5rem;
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
 
-  @media (min-width: 640px) { padding: 0 1.5rem;}
-  @media (min-width: 1024px) { padding: 0 2rem;}
-`;
+  @media (max-width: 640px) { padding: 0 1.2rem; }
+`
 
-const Logo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
+const NavLogo = styled.span`
+  font-family: var(--font-orbitron), monospace;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #fff;
 
-  .icon {
-    font-size: 2.25rem;
-    color: #059669;}
-
-  span {
-    font-weight: 700;
-    font-size: 1.5rem;
-    letter-spacing: -0.025em;
-    color: #292524;
-
-    .accent { color: #059669;}}
-`;
+  em { color: #059669; font-style: normal; }
+`
 
 const NavLinks = styled.div`
-  display: none;
-  @media (min-width: 768px) {
-    display: flex;
-    align-items: baseline;
-    gap: 2rem;}
-`;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+
+  @media (max-width: 640px) { gap: 1rem; }
+`
 
 const NavLink = styled.a`
-  font-weight: 500;
-  font-size: 0.875rem;
-  color: #292524;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
   transition: color 0.2s;
-  padding: 0.5rem 0.75rem;
 
-  &:hover {
-    color: #059669;}
-`;
+  &:hover { color: #059669; }
 
-const BudgetBtn = styled.a`
-  background-color: #059669;
-  color: white;
-  padding: 0.5rem 1.25rem;
-  border-radius: 9999px;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all 0.3s;
-  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);
+  @media (max-width: 640px) { display: none; }
+`
 
-  &:hover {
-    background-color: #047857;
-    transform: translateY(-2px);
-    box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.3);}
-`;
+const BackLink = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+  text-decoration: none;
+  transition: color 0.2s;
 
-const Hero = styled.header`
+  &:hover { color: #059669; }
+`
+
+// ─── Hero ─────────────────────────────────────────────────────────────────────
+
+const Hero = styled.section`
   position: relative;
   height: 100vh;
+  min-height: 680px;
   display: flex;
   align-items: center;
-  justify-content: center;
   overflow: hidden;
-`;
-
-const HeroBg = styled.div`
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;}
-
-  .gradient {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.2), #fafaf9);}
-`;
-
-const MobileNavToggle = styled.div`
-  display: block;
-  @media (min-width: 768px) {
-    display: none;}
-`;
-
-const MobileMenuDropdown = styled.div`
-  display: block;
-  background: white;
-  border-top: 1px solid #e7e5e4;
-  padding: 1rem;
-  @media (min-width: 768px) {
-    display: none;
-  }
-`;
-
-const BounceArrow = styled.div`
-position: absolute;
-bottom: 2.5rem;
-left: 50%;
-transform: translateX(-50%);
-color: rgba(255, 255, 255, 0.8);
-animation: ${bounce} 1s infinite;
-display: flex;
-align-items: center;
-justify-content: center;
-`;
-
-const HeroContent = styled.div`
-position: relative;
-z-index: 10;
-text-align: center;
-padding: 0 1rem;
-max-width: 56rem;
-margin: 4rem auto 0;
-`;
-
-const HeroBadge = styled.span`
-display: inline-block;
-padding: 0.25rem 0.75rem;
-border-radius: 9999px;
-background-color: rgba(255, 255, 255, 0.2);
-backdrop-filter: blur(12px);
-color: white;
-border: 1px solid rgba(255, 255, 255, 0.3);
-font-size: 0.75rem;
-font-weight: 600;
-letter-spacing: 0.05em;
-text-transform: uppercase;
-margin-bottom: 1rem;
-animation: ${fadeInUp} 0.8s ease-out;
-`;
-
-const HeroTitle = styled.h1`
-font-family: var(--font-playfair), serif;
-font-size: 3rem;
-font-weight: 700;
-color: white;
-margin-bottom: 1.5rem;
-line-height: 1.25;
-text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-@media(min-width: 768px) { font-size: 4.5rem;}
-
-  .accent {
-  font-style: italic;
-  color: #6ee7b7;}
-`;
-
-const HeroDesc = styled.p`
-font-size: 1.125rem;
-font-weight: 300;
-color: #f5f5f4;
-margin-bottom: 2rem;
-max-width: 42rem;
-margin-left: auto;
-margin-right: auto;
-text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-@media(min-width: 768px) { font-size: 1.25rem;}
-`;
-
-const HeroActions = styled.div`
-display: flex;
-flex-direction: column;
-gap: 1rem;
-justify-content: center;
-
-@media(min-width: 640px) { flex-direction: row;}
-`;
-
-const GlassBtn = styled.a`
-padding: 1rem 2rem;
-background: rgba(255, 255, 255, 0.85);
-backdrop-filter: blur(12px);
-color: #064e3b;
-border-radius: 9999px;
-font-weight: 600;
-transition: all 0.3s;
-box-shadow: 0 10px 15px-3px rgba(0, 0, 0, 0.1);
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 0.5rem;
-
-  &:hover {
-  background: white;
-  transform: translateY(-0.25rem);
-  box-shadow: 0 20px 25px -5px rgba(255, 255, 255, 0.5);}
-`;
-
-const Section = styled.section`
-padding: 6rem 0;
-position: relative;
-`;
-
-const LeafPattern = styled.div`
-position: absolute;
-inset: 0;
-z-index: 0;
-background-image: radial-gradient(#10b981 1px, transparent 1px);
-background-size: 20px 20px;
-opacity: 0.1;
-`;
-
-const SectionHeader = styled.div`
-text-align: center;
-margin-bottom: 4rem;
-position: relative;
-z-index: 10;
-
-  h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #292524;
-  margin-bottom: 1rem;}
-
-  .divider {
-  width: 6rem;
-  height: 0.25rem;
-  background-color: #10b981;
-  margin: 0 auto;
-  border-radius: 9999px;}
-
-  p {
-  margin-top: 1rem;
-  color: #57534e;
-  max-width: 42rem;
-  margin-left: auto;
-  margin-right: auto;}
-`;
-
-const ServicesGrid = styled.div`
-display: grid;
-grid-template-columns: repeat(1, minmax(0, 1fr));
-gap: 2rem;
-max-width: 1280px;
-margin: 0 auto;
-padding: 0 1rem;
-position: relative;
-z-index: 10;
-
-@media(min-width: 768px) { grid-template-columns: repeat(2, minmax(0, 1fr));}
-@media(min-width: 1024px) { grid-template-columns: repeat(3, minmax(0, 1fr));}
-`;
-
-const ServiceCard = styled.div`
-background-color: white;
-border-radius: 1rem;
-overflow: hidden;
-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-border: 1px solid #f5f5f4;
-transition: all 0.3s;
-
-  &:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-  transform: translateY(-0.125rem);}
-
-  .img-container {
-  height: 12rem;
-  overflow: hidden;
-  position: relative;}
-
-  img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s;}
-
-  &:hover img {
-  transform: scale(1.1);}
-
-  .icon-badge {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  background-color: #059669;
-  color: white;
-  padding: 0.5rem;
-  border-top-right-radius: 0.75rem;}
-
-  .content {
-  padding: 2rem;}
-
-  h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #292524;
-  margin-bottom: 0.75rem;
-  transition: color 0.2s;}
-
-  &:hover h3 {
-  color: #059669;}
-
-  p {
-  color: #57534e;
-  line-height: 1.625;
-  margin-bottom: 1rem;}
-
-  ul {
-  font-size: 0.875rem;
-  color: #78716c;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;}
-
-  li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-    .icon {
-    color: #10b981;
-    font-size: 0.875rem;}}
-`;
-
-const StylesSection = styled(Section)`
-background-color: #1c1917;
-color: white;
-transition: all 0.7s;
-`;
-
-const StylistContainer = styled.div`
-max-width: 1280px;
-margin: 0 auto;
-padding: 0 1rem;
-display: flex;
-flex-direction: column;
-gap: 3rem;
-position: relative;
-z-index: 20;
-
-@media(min-width: 768px) {
-  flex-direction: row;
-  align-items: center;
-  padding: 0 1.5rem;}
-`;
-
-const StyleControls = styled.div`
-width: 100%;
-@media(min-width: 768px) { width: 50%;}
-
-  .badge {
-  color: #34d399;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-  display: block;}
-
-  h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 2.25rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  line-height: 1.25;
-
-  @media(min-width: 768px) { font-size: 3rem;}
-
-    span {
-    color: transparent;
-    background-clip: text;
-    -webkit-background-clip: text;
-    background-image: linear-gradient(to right, #34d399, #99f6e4);}}
-
-  .desc {
-  color: #d6d3d1;
-  font-size: 1.125rem;
-  margin-bottom: 2.5rem;}
-`;
-
-const StyleBtn = styled.button<{ $active: boolean }>`
-width: 100%;
-padding: 1.5rem;
-border-radius: 0.75rem;
-border: 1px solid ${props => props.$active ? '#10b981' : '#44403c'};
-background-color: ${props => props.$active ? 'rgba(6, 78, 59, 0.3)' : 'rgba(41, 37, 36, 0.5)'};
-text-align: left;
-display: flex;
-align-items: center;
-gap: 1rem;
-transition: all 0.3s;
-margin-bottom: 1rem;
-
-  &:hover {
-  background-color: rgba(6, 78, 59, 0.3);
-  border-color: #10b981;}
-
-  .circle {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 9999px;
-  background-color: ${props => props.$active ? '#10b981' : 'rgba(120, 113, 108, 0.2)'};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s;
-
-    .icon {
-    color: ${props => props.$active ? 'white' : '#d6d3d1'};
-    transition: color 0.3s;}}
-
-  h4 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: ${props => props.$active ? '#6ee7b7' : 'white'};
-  transition: color 0.3s;}
-
-  p {
-  font-size: 0.875rem;
-  color: #a8a29e;}
-`;
-
-const StylePreview = styled.div`
-width: 100%;
-height: 500px;
-position: relative;
-border-radius: 1rem;
-overflow: hidden;
-box-shadow: 0 25px 50px-12px rgba(0, 0, 0, 0.25);
-border: 1px solid #44403c;
-
-@media(min-width: 768px) { width: 50%;}
-
-  img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: all 0.5s;
-    &:hover { transform: scale(1.05);}}
-
-  .content {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-  padding: 2rem;}
-
-  h3 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;}
-
-  p {
-  color: #d6d3d1;
-  font-size: 0.875rem;}
-`;
-
-const WhyUsSection = styled(Section)`
-background-color: #ecfdf5;
-`;
-
-const WhyUsGrid = styled.div`
-max-width: 1280px;
-margin: 0 auto;
-padding: 0 1rem;
-display: grid;
-grid-template-columns: repeat(1, minmax(0, 1fr));
-gap: 3rem;
-align-items: center;
-
-@media(min-width: 768px) { grid-template-columns: repeat(2, minmax(0, 1fr));}
-`;
-
-const WhyUsImgWrapper = styled.div`
-position: relative;
-
-  .blob {
-  position: absolute;
-  width: 6rem;
-  height: 6rem;
-  border-radius: 9999px;
-  mix-blend-mode: multiply;
-  filter: blur(24px);
-  opacity: 0.7;
-  animation: ${blob} 7s infinite;}
-
-  .blob-1 { top: -1rem; left: -1rem; background-color: #d1fae5;}
-  .blob-2 { bottom: -1rem; right: -1rem; background-color: #ccfbf1; animation-delay: 2s;}
-
-  img {
-  position: relative;
-  border-radius: 1rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  transform: rotate(2deg);
-  transition: all 0.5s;
-  width: 100%;
-
-    &:hover { transform: rotate(0);}}
-`;
-
-const WhyUsItem = styled.div`
-display: flex;
-align-items: flex-start;
-gap: 1rem;
-margin-bottom: 1.5rem;
-
-  .icon-wrapper {
-  flex-shrink: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 9999px;
-  background-color: #d1fae5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #059669;}
-
-  h4 {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #292524;}
-
-  p {
-  font-size: 0.875rem;
-  color: #57534e;}
-`;
-
-const ContactSection = styled(Section)`
-background-color: rgba(250, 250, 249, 0.9);
-
-  .bg-img {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-    
-    img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0.5;
-    filter: grayscale(100%);}
-
-    .overlay {
-    position: absolute;
-    inset: 0;
-    background-color: rgba(255, 255, 255, 0.9);}}
-`;
-
-const ContactCard = styled.div`
-background-color: white;
-border-radius: 1.5rem;
-box-shadow: 0 25px 50px-12px rgba(0, 0, 0, 0.25);
-padding: 2rem;
-border: 1px solid #f5f5f4;
-max-width: 48rem;
-margin: 0 auto;
-position: relative;
-z-index: 10;
-
-@media(min-width: 768px) { padding: 3rem;}
-
-  .header {
-  text-align: center;
-  margin-bottom: 2.5rem;
-
-    .badge {
-    color: #059669;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-size: 0.75rem;}
-
-    h2 {
-    font-size: 1.875rem;
-    font-weight: 700;
-    color: #292524;
-    margin-top: 0.5rem;}
-
-    p {
-    color: #78716c;
-    margin-top: 0.5rem;}}
-
-  form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;}
-
-  .grid {
-  display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-  gap: 1.5rem;
-  @media(min-width: 768px) { grid-template-columns: repeat(2, minmax(0, 1fr));}}
-
-  label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #44403c;
-  margin-bottom: 0.25rem;}
-
-input, select, textarea {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  background-color: #fafaf9;
-  border: 1px solid #e7e5e4;
-  outline: none;
-  transition: all 0.2s;
-
-    &:focus {
-    border-color: #10b981;
-    box-shadow: 0 0 0 2px rgba(167, 243, 208, 1);}}
-
-  button {
-  width: 100%;
-  background-color: #059669;
-  color: white;
-  font-weight: 700;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  transition: all 0.3s;
-  box-shadow: 0 10px 15px-3px rgba(16, 185, 129, 0.3);
-
-    &:hover {
-    background-color: #047857;
-    transform: translateY(-0.125rem);
-    box-shadow: 0 20px 25px-5px rgba(16, 185, 129, 0.4);}}
-`;
+`
 
 const ThreeMount = styled.div`
   position: absolute;
   inset: 0;
+  z-index: 0;
+`
+
+const HeroOverlay = styled.div`
+  position: absolute;
+  inset: 0;
   z-index: 1;
-  pointer-events: none;
-`;
+  background: linear-gradient(
+    135deg,
+    rgba(0,0,0,0.85) 0%,
+    rgba(0,0,0,0.3) 55%,
+    rgba(0,0,0,0.65) 100%
+  );
 
-const Footer = styled.footer`
-background-color: #1c1917;
-color: #a8a29e;
-padding: 3rem 0;
-border-top: 1px solid #292524;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(5,150,105,0.2), transparent);
+    animation: ${scanline} 8s linear infinite;
+  }
+`
 
-  .container {
+const HeroContent = styled.div`
+  position: relative;
+  z-index: 2;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 2rem;
+  animation: ${fadeInUp} 1.2s ease both;
+
+  @media (max-width: 640px) { padding: 0 1.2rem; }
+`
+
+const HeroBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(5,150,105,0.1);
+  border: 1px solid rgba(5,150,105,0.45);
+  color: #34d399;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  padding: 0.5rem 1.2rem;
+  margin-bottom: 2rem;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+`
+
+const HeroTitle = styled.h1`
+  font-family: var(--font-orbitron), monospace;
+  font-size: clamp(2.2rem, 5.5vw, 4.8rem);
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+  margin-bottom: 1.5rem;
+
+  .green { color: #059669; }
+  .mint  { color: #6ee7b7; }
+`
+
+const HeroSub = styled.p`
+  font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+  color: rgba(255,255,255,0.65);
+  max-width: 580px;
+  line-height: 1.9;
+  font-weight: 300;
+  margin-bottom: 3rem;
+`
+
+const HeroStats = styled.div`
+  display: flex;
+  gap: 3rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 480px) { gap: 1.5rem; }
+`
+
+const Stat = styled.div`
+  .value {
+    display: block;
+    font-family: var(--font-orbitron), monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #059669;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .label {
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+`
+
+const ScrollHint = styled.div`
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.5rem;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.6rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+
+  &::after {
+    content: '';
+    width: 1px;
+    background: linear-gradient(to bottom, rgba(5,150,105,0.9), transparent);
+    animation: ${lineDown} 1.8s ease-in-out infinite;
+  }
+`
+
+// ─── Sections base ────────────────────────────────────────────────────────────
+
+const SectionWrap = styled.section`
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 7rem 2rem;
+
+  @media (max-width: 768px) { padding: 4rem 1.5rem; }
+`
+
+const SectionLabel = styled.p`
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: #059669;
+  margin-bottom: 0.8rem;
+`
+
+const SectionTitle = styled.h2`
+  font-family: var(--font-orbitron), monospace;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin-bottom: 1.2rem;
+`
+
+const SectionDivider = styled.div`
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #059669, #6ee7b7);
+  margin-bottom: 3.5rem;
+`
+
+// ─── Overview ─────────────────────────────────────────────────────────────────
+
+const OverviewGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+`
+
+const OverviewText = styled.div`
+  p {
+    color: rgba(255,255,255,0.65);
+    line-height: 1.95;
+    font-size: 0.98rem;
+    font-weight: 300;
+    margin-bottom: 1.4rem;
+
+    strong {
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
+    }
+  }
+`
+
+const Screenshot = styled.div`
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(135deg, #059669, #6ee7b7, #059669);
+    background-size: 200% 200%;
+    z-index: -1;
+    opacity: 0.5;
+  }
+
+  img {
+    width: 100%;
+    display: block;
+    filter: brightness(0.88) contrast(1.05);
+  }
+`
+
+// ─── Features ─────────────────────────────────────────────────────────────────
+
+const FeaturesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.5rem;
 
-  @media(min-width: 768px) {
-    flex-direction: row;
-    padding: 0 2rem;}}
+  @media (max-width: 1024px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 580px)  { grid-template-columns: 1fr; }
+`
 
-  .links {
+const FeatureCard = styled.div`
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 2rem 1.8rem;
+  position: relative;
+  transition: all 0.3s ease;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%);
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 18px;
+    height: 18px;
+    background: #059669;
+    clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    transition: background 0.3s;
+  }
+
+  &:hover {
+    border-color: rgba(5,150,105,0.35);
+    background: rgba(5,150,105,0.04);
+    transform: translateY(-5px);
+    box-shadow: 0 24px 48px rgba(5,150,105,0.08);
+  }
+
+  &:hover::after { background: #6ee7b7; }
+
+  .icon {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+
+  h3 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #fff;
+    margin-bottom: 0.8rem;
+  }
+
+  p {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.875rem;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+`
+
+// ─── Architecture ─────────────────────────────────────────────────────────────
+
+const ArchGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+`
+
+const ArchBlock = styled.div`
+  h3 {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #6ee7b7;
+    margin-bottom: 1.5rem;
+  }
+`
+
+const ArchList = styled.ul`
+  list-style: none;
   display: flex;
-  gap: 1.5rem;}
+  flex-direction: column;
+  gap: 0.9rem;
+`
 
-a:hover { color: #10b981;}
-`;
+const ArchItem = styled.li`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.9rem;
+  font-weight: 300;
+  line-height: 1.6;
 
-// ─── Three.js Pollen Rising ───────────────────────────────────────────────────
+  &::before {
+    content: '▸';
+    color: #059669;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+`
 
-function usePollenScene(mountRef: React.RefObject<HTMLDivElement | null>) {
+// ─── Tech Stack ───────────────────────────────────────────────────────────────
+
+const TechWrap = styled.section`
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 5rem 2rem;
+`
+
+const TechInner = styled.div`
+  max-width: 1280px;
+  margin: 0 auto;
+`
+
+const TechGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+`
+
+const TechBadge = styled.div<{ $mint?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.2rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid ${p => p.$mint ? 'rgba(110,231,183,0.35)' : 'rgba(5,150,105,0.3)'};
+  color: ${p => p.$mint ? '#6ee7b7' : '#34d399'};
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: background 0.2s;
+
+  &:hover { background: rgba(255,255,255,0.06); }
+`
+
+// ─── CTA ──────────────────────────────────────────────────────────────────────
+
+const CTASection = styled.section`
+  position: relative;
+  padding: 8rem 2rem;
+  text-align: center;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(5,150,105,0.07) 0%, transparent 65%);
+    pointer-events: none;
+  }
+`
+
+const CTATitle = styled.h2`
+  font-family: var(--font-orbitron), monospace;
+  font-size: clamp(1.8rem, 4vw, 3.2rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+
+  span { color: #059669; }
+`
+
+const CTASub = styled.p`
+  color: rgba(255,255,255,0.55);
+  font-size: 1.05rem;
+  line-height: 1.9;
+  font-weight: 300;
+  max-width: 520px;
+  margin: 0 auto 3rem;
+`
+
+const CTAButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+`
+
+const CTABtn = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: #059669;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 1.2rem 3rem;
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  transition: all 0.3s ease;
+  animation: ${glowPulse} 3s ease-in-out infinite;
+
+  &:hover {
+    background: #047857;
+    transform: translateY(-3px);
+  }
+`
+
+const CTABtnOutline = styled.a`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  text-decoration: none;
+  padding: 1.2rem 3rem;
+  border: 1px solid rgba(255,255,255,0.15);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #059669;
+    color: #34d399;
+    transform: translateY(-3px);
+  }
+`
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+
+const Footer = styled.footer`
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 2.5rem 2rem;
+  text-align: center;
+`
+
+const FooterBack = styled.a`
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.3);
+  text-decoration: none;
+  transition: color 0.2s;
+
+  &:hover { color: #059669; }
+`
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+
+const FEATURES = [
+  {
+    icon: '🌿',
+    title: 'Design & Paisagismo',
+    desc: 'Projetos exclusivos que harmonizam arquitetura e natureza, com visualização 3D e seleção botânica personalizada.',
+  },
+  {
+    icon: '✂️',
+    title: 'Manutenção Premium',
+    desc: 'Podas técnicas, adubação e controle de pragas para que o jardim esteja sempre impecável.',
+  },
+  {
+    icon: '💧',
+    title: 'Irrigação Inteligente',
+    desc: 'Sistemas automatizados controlados por smartphone que economizam água e garantem a saúde das plantas.',
+  },
+  {
+    icon: '🎨',
+    title: 'Galeria de Estilos',
+    desc: 'Galeria interativa com três estilos — Tropical, Moderno Minimalista e Zen Oriental — para o cliente visualizar a transformação.',
+  },
+  {
+    icon: '🌱',
+    title: 'Diferenciais da Marca',
+    desc: 'Seção "Por que escolher a VerdeVivo?" com sustentabilidade, pontualidade e garantia verde como pilares.',
+  },
+  {
+    icon: '📋',
+    title: 'Formulário de Orçamento',
+    desc: 'Captação de leads direto na página com tipo de serviço, mensagem e retorno de pré-orçamento em 24h.',
+  },
+]
+
+const ARCH_DESIGN = [
+  'Hero com imagem de fundo e gradiente orgânico',
+  'Navbar transparente com transição ao scroll',
+  'Grid de serviços com cards com imagem e ícone',
+  'Galeria interativa com troca de imagem ao selecionar estilo',
+  'Seção escura com background parallax e controles de estilo',
+  'Seção "Por que nós" com blobs animados e lista de diferenciais',
+]
+
+const ARCH_UX = [
+  'Paleta clara (fundo #fafaf9) com accent verde esmeralda',
+  'Tipografia Playfair Display para títulos elegantes',
+  'Botões arredondados com sombra esmeralda',
+  'Formulário de orçamento com validação de campos',
+  'Menu mobile com dropdown animado',
+  'Footer com logo, links e redes sociais',
+]
+
+const TECH = [
+  { label: 'Next.js',           mint: false },
+  { label: 'React 19',          mint: false },
+  { label: 'TypeScript',        mint: false },
+  { label: 'Styled-Components', mint: true  },
+  { label: 'Material Symbols',  mint: true  },
+  { label: 'CSS Animations',    mint: true  },
+]
+
+// ─── Three.js Nature Scene ────────────────────────────────────────────────────
+
+function useNatureScene(mountRef: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
     const el = mountRef.current
     if (!el) return
 
     const scene = new THREE.Scene()
+    scene.fog = new THREE.FogExp2(0x000000, 0.018)
 
-    const camera = new THREE.PerspectiveCamera(65, el.clientWidth / el.clientHeight, 0.1, 300)
-    camera.position.set(0, 0, 55)
+    const camera = new THREE.PerspectiveCamera(60, el.clientWidth / el.clientHeight, 0.1, 500)
+    camera.position.set(0, 14, 50)
+    camera.lookAt(0, 0, 0)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
     renderer.setSize(el.clientWidth, el.clientHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     el.appendChild(renderer.domElement)
 
-    // ── Particle system ──
-    const PARTICLE_COUNT = 1200
-    const positions   = new Float32Array(PARTICLE_COUNT * 3)
-    const velocities  = new Float32Array(PARTICLE_COUNT)   // vertical speed per particle
-    const offsets     = new Float32Array(PARTICLE_COUNT)   // horizontal sway offset
-    const colors      = new Float32Array(PARTICLE_COUNT * 3)
+    const GREEN = new THREE.Color(0x059669)
+    const MINT  = new THREE.Color(0x6ee7b7)
 
-    const GREENS = [
-      new THREE.Color(0x059669),
-      new THREE.Color(0x10b981),
-      new THREE.Color(0x34d399),
-      new THREE.Color(0x6ee7b7),
-      new THREE.Color(0xffffff),
-    ]
+    // Grid
+    const grid = new THREE.GridHelper(200, 40, 0x059669, 0x0a1a0a)
+    ;(grid.material as THREE.Material).opacity = 0.2
+    ;(grid.material as THREE.Material).transparent = true
+    grid.position.y = -8
+    scene.add(grid)
 
-    const SPREAD_X = 80
-    const SPREAD_Y = 70
-    const SPREAD_Z = 40
+    // Leaf-like icosahedrons floating
+    const leaves: THREE.LineSegments[] = []
+    const leafData = [
+      [-18,  2, -6, 3.5, true ],
+      [ -7,  5, -9, 5.0, false],
+      [  5,  3, -5, 4.0, true ],
+      [ 16,  6, -7, 3.0, false],
+      [ -3,  9,  3, 4.5, true ],
+      [ 12,  1,  4, 2.5, false],
+      [-12,  7,  6, 3.5, true ],
+    ] as const
 
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      positions[i * 3]     = (Math.random() - 0.5) * SPREAD_X
-      positions[i * 3 + 1] = (Math.random() - 0.5) * SPREAD_Y
-      positions[i * 3 + 2] = (Math.random() - 0.5) * SPREAD_Z
-
-      velocities[i] = 0.015 + Math.random() * 0.04
-      offsets[i]    = Math.random() * Math.PI * 2
-
-      const c = GREENS[Math.floor(Math.random() * GREENS.length)]
-      colors[i * 3]     = c.r
-      colors[i * 3 + 1] = c.g
-      colors[i * 3 + 2] = c.b
+    for (const [x, y, z, r, isGreen] of leafData) {
+      const geo = new THREE.IcosahedronGeometry(r * 0.5, 0)
+      const edges = new THREE.EdgesGeometry(geo)
+      const mat = new THREE.LineBasicMaterial({
+        color: isGreen ? GREEN : MINT,
+        transparent: true,
+        opacity: 0.45,
+        blending: THREE.AdditiveBlending,
+      })
+      const leaf = new THREE.LineSegments(edges, mat)
+      leaf.position.set(x, y - 8, z)
+      scene.add(leaf)
+      leaves.push(leaf)
+      geo.dispose()
     }
 
-    const geo = new THREE.BufferGeometry()
-    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    geo.setAttribute('color',    new THREE.BufferAttribute(colors,    3))
+    // Particles
+    const count = 1000
+    const pos = new Float32Array(count * 3)
+    const col = new Float32Array(count * 3)
 
-    const mat = new THREE.PointsMaterial({
-      size: 0.5,
+    for (let i = 0; i < count; i++) {
+      pos[i * 3]     = (Math.random() - 0.5) * 130
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 70
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 130
+      const c = Math.random() > 0.4 ? GREEN : MINT
+      col[i * 3]     = c.r
+      col[i * 3 + 1] = c.g
+      col[i * 3 + 2] = c.b
+    }
+
+    const pGeo = new THREE.BufferGeometry()
+    pGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    pGeo.setAttribute('color',    new THREE.BufferAttribute(col, 3))
+
+    const pMat = new THREE.PointsMaterial({
+      size: 0.28,
       vertexColors: true,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.65,
       blending: THREE.AdditiveBlending,
-      sizeAttenuation: true,
     })
 
-    const points = new THREE.Points(geo, mat)
-    scene.add(points)
+    const particles = new THREE.Points(pGeo, pMat)
+    scene.add(particles)
 
-    // ── Mouse parallax ──
     let mouseX = 0
     let mouseY = 0
     const onMouseMove = (e: MouseEvent) => {
@@ -792,7 +747,6 @@ function usePollenScene(mountRef: React.RefObject<HTMLDivElement | null>) {
     }
     document.addEventListener('mousemove', onMouseMove)
 
-    // ── Resize ──
     const onResize = () => {
       if (!el) return
       camera.aspect = el.clientWidth / el.clientHeight
@@ -801,322 +755,217 @@ function usePollenScene(mountRef: React.RefObject<HTMLDivElement | null>) {
     }
     window.addEventListener('resize', onResize)
 
-    // ── Animate ──
     let frameId: number
     let t = 0
-    const posAttr = geo.attributes.position as THREE.BufferAttribute
 
     const animate = () => {
       frameId = requestAnimationFrame(animate)
-      t += 0.01
+      t += 0.003
 
-      const arr = posAttr.array as Float32Array
+      scene.rotation.y = t * 0.08 + mouseX * 0.06
+      camera.position.y = 14 + Math.sin(t * 0.35) * 2 + mouseY * -2
+      camera.lookAt(0, 0, 0)
 
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
-        // Rise
-        arr[i * 3 + 1] += velocities[i]
-        // Sway
-        arr[i * 3]     += Math.sin(t + offsets[i]) * 0.008
+      leaves.forEach((leaf, i) => {
+        leaf.rotation.x = t * 0.25 + i * 0.6
+        leaf.rotation.y = t * 0.18 + i * 0.4
+        ;(leaf.material as THREE.LineBasicMaterial).opacity = 0.25 + Math.sin(t * 0.8 + i) * 0.2
+      })
 
-        // Wrap around top
-        if (arr[i * 3 + 1] > SPREAD_Y / 2) {
-          arr[i * 3 + 1] = -SPREAD_Y / 2
-          arr[i * 3]      = (Math.random() - 0.5) * SPREAD_X
-        }
-      }
-      posAttr.needsUpdate = true
-
-      // Subtle parallax
-      scene.rotation.y = mouseX * 0.04
-      scene.rotation.x = mouseY * 0.02
-
+      particles.rotation.y = t * 0.03
       renderer.render(scene, camera)
     }
     animate()
 
-    // ── Cleanup ──
     return () => {
       cancelAnimationFrame(frameId)
       document.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('resize', onResize)
 
-      scene.remove(points)
-      geo.dispose()
-      mat.dispose()
+      scene.remove(grid)
+      grid.geometry.dispose()
+      ;(grid.material as THREE.Material).dispose()
+
+      leaves.forEach(leaf => {
+        scene.remove(leaf)
+        leaf.geometry.dispose()
+        ;(leaf.material as THREE.Material).dispose()
+      })
+
+      scene.remove(particles)
+      pGeo.dispose()
+      pMat.dispose()
       scene.clear()
 
       renderer.dispose()
-      if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement)
+      if (el.contains(renderer.domElement)) {
+        el.removeChild(renderer.domElement)
+      }
     }
   }, [mountRef])
 }
 
-// --- Data ---
-
-const stylesData = {
-  tropical: {
-    title: "Refúgio Tropical",
-    desc: "Plantas nativas como Heliconias e Bromélias criam um microclima fresco e uma estética impactante.",
-    img: "/assets/verdevivo/galeria_tropical.png",
-    bg: "/assets/verdevivo/galeria_tropical_bg.png"
-  },
-  minimalist: {
-    title: "Oásis Urbano",
-    desc: "Geometria pura, caminhos de concreto flutuante e suculentas. Menos é mais.",
-    img: "/assets/verdevivo/galeria_moderno.png",
-    bg: "/assets/verdevivo/galeria_moderno_bg.png"
-  },
-  zen: {
-    title: "Serenidade Oriental",
-    desc: "A harmonia perfeita entre pedras, água e musgos. Um espaço para meditação.",
-    img: "/assets/verdevivo/galeria_zen.png",
-    bg: "/assets/verdevivo/galeria_zen_bg.png"
-  }
-};
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function VerdeVivoPage() {
-  const [scrolled, setScrolled] = useState(false);
-  const [activeStyle, setActiveStyle] = useState('tropical');
-  const threeRef = useRef<HTMLDivElement>(null);
-  usePollenScene(threeRef);
-  const [previewOpacity, setPreviewOpacity] = useState(1);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false)
+  const mountRef = useRef<HTMLDivElement>(null)
+
+  useNatureScene(mountRef)
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const changeStyle = (key: string) => {
-    setPreviewOpacity(0);
-    setTimeout(() => {
-      setActiveStyle(key);
-      setPreviewOpacity(1);
-    }, 300);
-  };
-
-  const currentData = stylesData[activeStyle as keyof typeof stylesData];
+    const onScroll = () => setScrolled(window.scrollY > 60)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   return (
     <Container>
       <Nav $scrolled={scrolled}>
-        <NavContainer>
-          <Logo onClick={() => window.scrollTo(0, 0)}>
-            <span className="material-symbols-outlined icon">yard</span>
-            <span>Verde<span className="accent">Vivo</span></span>
-          </Logo>
+        <NavInner>
+          <NavLogo>V<em>.</em>IJALES</NavLogo>
           <NavLinks>
-            <NavLink href="#servicos">Serviços</NavLink>
-            <NavLink href="#estilos">Inspiração</NavLink>
-            <NavLink href="#sobre">Sobre</NavLink>
-            <BudgetBtn href="#contato">Orçamento</BudgetBtn>
+            <NavLink href="#features">Features</NavLink>
+            <NavLink href="#design">Design</NavLink>
+            <BackLink href="/#portfolio">← Portfólio</BackLink>
           </NavLinks>
-          <MobileNavToggle>
-            <button onClick={() => setIsMenuOpen(!isMenuOpen)} style={{ padding: '0.5rem', color: '#57534e', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-          </MobileNavToggle>
-        </NavContainer>
-        {isMenuOpen && (
-          <MobileMenuDropdown>
-            <NavLink href="#servicos" onClick={() => setIsMenuOpen(false)} style={{ display: 'block' }}>Serviços</NavLink>
-            <NavLink href="#estilos" onClick={() => setIsMenuOpen(false)} style={{ display: 'block' }}>Inspiração</NavLink>
-            <NavLink href="#sobre" onClick={() => setIsMenuOpen(false)} style={{ display: 'block' }}>Sobre</NavLink>
-            <NavLink href="#contato" onClick={() => setIsMenuOpen(false)} style={{ display: 'block', fontWeight: 'bold', color: '#059669' }}>Solicitar Orçamento</NavLink>
-          </MobileMenuDropdown>
-        )}
+        </NavInner>
       </Nav>
 
       <Hero>
-        <HeroBg>
-          <img src="/assets/verdevivo/hero.png" alt="Jardim Luxuoso" />
-          <div className="gradient"></div>
-        </HeroBg>
-        <ThreeMount ref={threeRef} aria-hidden="true" />
+        <ThreeMount ref={mountRef} aria-hidden="true" />
+        <HeroOverlay />
         <HeroContent>
-          <HeroBadge>Design Biofílico & Paisagismo</HeroBadge>
+          <HeroBadge>Template Web · Paisagismo & Jardins</HeroBadge>
           <HeroTitle>
-            Transforme seu espaço em um <span className="accent">santuário</span> natural.
+            Verde<br />
+            <span className="green">Vivo</span><br />
+            <span className="mint">Paisagismo</span>
           </HeroTitle>
-          <HeroDesc>
-            Criamos e mantemos jardins que respiram vida, unindo estética moderna com a tranquilidade da natureza.
-          </HeroDesc>
-          <HeroActions>
-            <GlassBtn href="#estilos">
-              <span className="material-symbols-outlined">explore</span> Explorar Estilos
-            </GlassBtn>
-            <GlassBtn href="#contato">Falar com Especialista</GlassBtn>
-          </HeroActions>
+          <HeroSub>
+            Site institucional para empresas de paisagismo — dos serviços
+            à galeria interativa de estilos — desenvolvido para transformar
+            visitantes em clientes.
+          </HeroSub>
+          <HeroStats>
+            <Stat>
+              <span className="value">3</span>
+              <span className="label">Serviços</span>
+            </Stat>
+            <Stat>
+              <span className="value">3</span>
+              <span className="label">Estilos</span>
+            </Stat>
+            <Stat>
+              <span className="value">100%</span>
+              <span className="label">Responsivo</span>
+            </Stat>
+          </HeroStats>
         </HeroContent>
-        <BounceArrow>
-          <span className="material-symbols-outlined" style={{ fontSize: '2.25rem' }}>keyboard_arrow_down</span>
-        </BounceArrow>
+        <ScrollHint>scroll</ScrollHint>
       </Hero>
 
-      <Section id="servicos">
-        <LeafPattern />
-        <SectionHeader>
-          <h2>Nossos Serviços</h2>
-          <div className="divider"></div>
-          <p>Do planejamento à manutenção, cuidamos de cada folha do seu jardim com precisão técnica e olhar artístico.</p>
-        </SectionHeader>
-        <ServicesGrid>
-          {[
-            { title: 'Design & Paisagismo', img: 'feature_desing.png', icon: 'architecture', desc: 'Projetos exclusivos que harmonizam arquitetura e natureza. Visualização 3D e seleção botânica personalizada.' },
-            { title: 'Manutenção Premium', img: 'feature_manutencao.png', icon: 'content_cut', desc: 'Cuidado constante para que seu jardim esteja sempre impecável. Podas técnicas, adubação e controle de pragas.' },
-            { title: 'Irrigação Inteligente', img: 'feature_irrigacao.png', icon: 'water_drop', desc: 'Sistemas automatizados que economizam água e garantem a saúde das plantas, controlados pelo seu smartphone.' },
-          ].map((s, i) => (
-            <ServiceCard key={i}>
-              <div className="img-container">
-                <img src={`/assets/verdevivo/${s.img}`} alt={s.title} />
-                <div className="icon-badge">
-                  <span className="material-symbols-outlined">{s.icon}</span>
-                </div>
-              </div>
-              <div className="content">
-                <h3>{s.title}</h3>
-                <p>{s.desc}</p>
-                <ul>
-                  <li><span className="material-symbols-outlined icon">check_circle</span> Consultoria no local</li>
-                  <li><span className="material-symbols-outlined icon">check_circle</span> Projetos 3D</li>
-                </ul>
-              </div>
-            </ServiceCard>
+      <SectionWrap>
+        <OverviewGrid>
+          <OverviewText>
+            <SectionLabel>Sobre o Projeto</SectionLabel>
+            <SectionTitle>Um jardim que vende</SectionTitle>
+            <SectionDivider />
+            <p>
+              A <strong>VerdeVivo Paisagismo</strong> é um template web completo
+              para empresas de jardinagem e paisagismo que precisam de uma
+              presença digital elegante e orientada à geração de leads.
+              Cada seção foi criada para transmitir naturalidade, confiança e sofisticação.
+            </p>
+            <p>
+              O design mistura uma paleta clara e orgânica com elementos
+              visuais de alto impacto — hero com imagem de jardim, galeria
+              interativa de estilos e seção escura com parallax — para criar
+              uma experiência imersiva e memorável.
+            </p>
+            <p>
+              O objetivo é direto: <strong>apresentar os serviços, inspirar
+              com a galeria e capturar orçamentos</strong> — em uma única
+              página que reflete a qualidade do trabalho.
+            </p>
+          </OverviewText>
+          <Screenshot>
+            <img src="/assets/main/verdevivo.png" alt="Screenshot do VerdeVivo Paisagismo" />
+          </Screenshot>
+        </OverviewGrid>
+      </SectionWrap>
+
+      <SectionWrap id="features">
+        <SectionLabel>Funcionalidades</SectionLabel>
+        <SectionTitle>O que o template entrega</SectionTitle>
+        <SectionDivider />
+        <FeaturesGrid>
+          {FEATURES.map(f => (
+            <FeatureCard key={f.title}>
+              <span className="icon">{f.icon}</span>
+              <h3>{f.title}</h3>
+              <p>{f.desc}</p>
+            </FeatureCard>
           ))}
-        </ServicesGrid>
-      </Section>
+        </FeaturesGrid>
+      </SectionWrap>
 
-      <StylesSection id="estilos" style={{ position: 'relative' }}>
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.4, zIndex: 0 }}>
-          <img
-            src={currentData.bg}
-            alt="bg"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'opacity 0.7s', opacity: previewOpacity * 0.4 }}
-          />
-        </div>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, #1c1917, rgba(28, 25, 23, 0.9), transparent)', zIndex: 10 }}></div>
-        <StylistContainer>
-          <StyleControls>
-            <span className="badge">Galeria Interativa</span>
-            <h2>Qual é a sua <br /> <span>Natureza?</span></h2>
-            <p className="desc">Selecione um estilo abaixo para visualizar como podemos transformar seu ambiente.</p>
-            <div>
-              {[
-                { key: 'tropical', title: 'Tropical Brasileiro', icon: 'forest', desc: 'Exuberante, vibrante e cheio de vida.' },
-                { key: 'minimalist', title: 'Moderno Minimalista', icon: 'crop_square', desc: 'Linhas retas, concreto e pouca manutenção.' },
-                { key: 'zen', title: 'Zen Oriental', icon: 'spa', desc: 'Equilíbrio, pedras, água e serenidade.' },
-              ].map(s => (
-                <StyleBtn key={s.key} $active={activeStyle === s.key} onClick={() => changeStyle(s.key)}>
-                  <div className="circle">
-                    <span className="material-symbols-outlined icon">{s.icon}</span>
-                  </div>
-                  <div>
-                    <h4>{s.title}</h4>
-                    <p>{s.desc}</p>
-                  </div>
-                </StyleBtn>
+      <SectionWrap id="design">
+        <SectionLabel>Design & UX</SectionLabel>
+        <SectionTitle>Elegância que converte</SectionTitle>
+        <SectionDivider />
+        <ArchGrid>
+          <ArchBlock>
+            <h3>Layout & Componentes</h3>
+            <ArchList>
+              {ARCH_DESIGN.map(item => (
+                <ArchItem key={item}>{item}</ArchItem>
               ))}
-            </div>
-          </StyleControls>
-          <StylePreview style={{ opacity: previewOpacity }}>
-            <img src={currentData.img} alt={currentData.title} />
-            <div className="content">
-              <h3>{currentData.title}</h3>
-              <p>{currentData.desc}</p>
-            </div>
-          </StylePreview>
-        </StylistContainer>
-      </StylesSection>
-
-      <WhyUsSection id="sobre">
-        <WhyUsGrid>
-          <WhyUsImgWrapper>
-            <div className="blob blob-1"></div>
-            <div className="blob blob-2"></div>
-            <img src="/assets/verdevivo/equipe.png" alt="Nossa Equipe" />
-          </WhyUsImgWrapper>
-          <div>
-            <h2 style={{ fontSize: '1.875rem', fontWeight: 'bold', color: '#292524', marginBottom: '1.5rem', fontFamily: 'var(--font-playfair), serif' }}>
-              Por que escolher a VerdeVivo?
-            </h2>
-            <div>
-              {[
-                { title: 'Sustentabilidade em 1º Lugar', icon: 'eco', desc: 'Utilizamos adubos orgânicos e técnicas que respeitam a biodiversidade local.' },
-                { title: 'Pontualidade e Limpeza', icon: 'schedule', desc: 'Respeitamos seu tempo e deixamos seu espaço mais limpo do que encontramos.' },
-                { title: 'Garantia Verde', icon: 'verified', desc: 'Garantia de replantio caso alguma muda não se adapte nas primeiras semanas.' },
-              ].map((item, i) => (
-                <WhyUsItem key={i}>
-                  <div className="icon-wrapper">
-                    <span className="material-symbols-outlined">{item.icon}</span>
-                  </div>
-                  <div>
-                    <h4>{item.title}</h4>
-                    <p>{item.desc}</p>
-                  </div>
-                </WhyUsItem>
+            </ArchList>
+          </ArchBlock>
+          <ArchBlock>
+            <h3>UX & Identidade Visual</h3>
+            <ArchList>
+              {ARCH_UX.map(item => (
+                <ArchItem key={item}>{item}</ArchItem>
               ))}
-            </div>
-          </div>
-        </WhyUsGrid>
-      </WhyUsSection>
+            </ArchList>
+          </ArchBlock>
+        </ArchGrid>
+      </SectionWrap>
 
-      <ContactSection id="contato">
-        <div className="bg-img">
-          <img src="/assets/verdevivo/contato.png" alt="bg" />
-          <div className="overlay"></div>
-        </div>
-        <ContactCard>
-          <div className="header">
-            <span className="badge">Vamos conversar</span>
-            <h2>Comece seu projeto hoje</h2>
-            <p>Preencha o formulário e receba um pré-orçamento em 24h.</p>
-          </div>
-          <form onSubmit={e => { e.preventDefault(); alert('Obrigado! Entraremos em contato em breve.'); }}>
-            <div className="grid">
-              <div>
-                <label>Nome</label>
-                <input type="text" placeholder="Seu nome" />
-              </div>
-              <div>
-                <label>Telefone</label>
-                <input type="tel" placeholder="(00) 00000-0000" />
-              </div>
-            </div>
-            <div>
-              <label>Tipo de Serviço</label>
-              <select>
-                <option>Manutenção Recorrente</option>
-                <option>Projeto de Paisagismo</option>
-                <option>Poda de Árvores</option>
-                <option>Instalação de Irrigação</option>
-                <option>Outro</option>
-              </select>
-            </div>
-            <div>
-              <label>Mensagem</label>
-              <textarea rows={4} placeholder="Conte um pouco sobre seu jardim..."></textarea>
-            </div>
-            <button type="submit">Enviar Solicitação</button>
-          </form>
-        </ContactCard>
-      </ContactSection>
+      <TechWrap>
+        <TechInner>
+          <SectionLabel>Stack Tecnológico</SectionLabel>
+          <SectionTitle>Tecnologias utilizadas</SectionTitle>
+          <SectionDivider />
+          <TechGrid>
+            {TECH.map(t => (
+              <TechBadge key={t.label} $mint={t.mint}>{t.label}</TechBadge>
+            ))}
+          </TechGrid>
+        </TechInner>
+      </TechWrap>
+
+      <CTASection>
+        <SectionLabel>Próximo Passo</SectionLabel>
+        <CTATitle>
+          Quer ver o projeto<br />
+          <span>em ação?</span>
+        </CTATitle>
+        <CTASub>
+          Acesse o template completo e explore a experiência real —
+          ou fale com a gente para desenvolver uma solução personalizada
+          para o seu negócio de paisagismo.
+        </CTASub>
+        <CTAButtons>
+          <CTABtn href="/portifolio/verdevivo/site">Ver o projeto →</CTABtn>
+          <CTABtnOutline href="/#contact">Fale com a gente</CTABtnOutline>
+        </CTAButtons>
+      </CTASection>
 
       <Footer>
-        <div className="container">
-          <Logo onClick={() => window.scrollTo(0, 0)}>
-            <span className="material-symbols-outlined icon">yard</span>
-            <span style={{ color: 'white' }}>Verde<span className="accent">Vivo</span></span>
-          </Logo>
-          <div style={{ fontSize: '0.875rem' }}>
-            © 2024 VerdeVivo Paisagismo. Todos os direitos reservados.
-          </div>
-          <div className="links">
-            <a href="#">Instagram</a>
-            <a href="#">Facebook</a>
-            <a href="#">Whatsapp</a>
-          </div>
-        </div>
+        <FooterBack href="/#portfolio">← Voltar ao portfólio</FooterBack>
       </Footer>
     </Container>
   )
