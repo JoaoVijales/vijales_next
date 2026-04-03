@@ -15,13 +15,13 @@ export default function ThreeBackground() {
         let renderer: THREE.WebGLRenderer
         let particles: THREE.Points
         let gridHelper: THREE.GridHelper
-        let gridRunners: GridRunner[] = []
+        const gridRunners: GridRunner[] = []
 
         // Interaction State
         let mouseX = 0
         let mouseY = 0
         let scrollY = 0
-        let targetScrollY = 0
+        const targetScrollY = 0
         let scrollSpeed = 0
         let lastScrollTime = 0
         let animationFrameId: number
@@ -95,7 +95,7 @@ export default function ThreeBackground() {
                     this.pickNextTarget()
                 }
 
-                let currentSpeed = this.speed + extraSpeed
+                const currentSpeed = this.speed + extraSpeed
 
                 const direction = new THREE.Vector3().subVectors(this.targetPos, this.currentPos)
                 const dist = direction.length()
