@@ -238,6 +238,12 @@ export default function PortfolioSection({ isActive = false }: PortfolioSectionP
           image="/portifolio/verdevivo.png"
           link="/portifolio/verdevivo"
         />
+        <PortfolioItem
+          title="Imobi Template"
+          description="Plataforma imobiliária full-stack — catálogo inteligente, busca avançada e gestão completa de imóveis"
+          image="/portifolio/imobiliaria.png"
+          link="/portifolio/imobiliaria"
+        />
       </Grid>
     </PortfolioWrapper>
   )
