@@ -28,6 +28,11 @@ export default function ThreeBackground() {
         let lastScrollTime = 0
         let animationFrameId: number
 
+        // Vortex State
+        let originalPositions: Float32Array
+        let particleCount: number
+        let wasVortexActive = false
+
         // --- Classes ---
 
         class GridRunner {
@@ -184,7 +189,7 @@ export default function ThreeBackground() {
             const vertices = []
             const colors = []
 
-            const particleCount = prefersReducedMotion ? 300 : 1500
+            particleCount = prefersReducedMotion ? 300 : 1500
             for (let i = 0; i < particleCount; i++) {
                 const x = (Math.random() - 0.5) * 600
                 const y = (Math.random() - 0.5) * 400
@@ -198,6 +203,9 @@ export default function ThreeBackground() {
 
             geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3))
             geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
+
+            // Snapshot of rest positions for vortex lerp
+            originalPositions = new Float32Array(geometry.attributes.position.array)
 
             const material = new THREE.PointsMaterial({
                 size: 0.5,
@@ -249,6 +257,59 @@ export default function ThreeBackground() {
 
             // Runners aceleram (quanto mais deep no tunnel, mais rápido)
             gridRunners.forEach(runner => runner.update(intensity * 28))
+
+            // ── Vortex de partículas ───────────────────────────────────────
+            const posAttr = particles?.geometry?.attributes?.position
+            if (particles && originalPositions && posAttr?.array) {
+                const posArray = posAttr.array as Float32Array
+
+                if (intensity > 0) {
+                    wasVortexActive = true
+                    const time = performance.now() * 0.001
+                    const spinDir = tunnel.direction
+
+                    // Cilindro 3D com raio constante baseado na projeção da tela
+                    const fovRad = camera.fov * Math.PI / 180
+                    const aspect = camera.aspect
+                    const vortexFrontDist = 5
+                    const vortexLength    = 350 // Mais longo para profundidade de horizonte
+
+                    // Raio calculado para "abraçar" toda a tela logo no início
+                    const projH = vortexFrontDist * Math.tan(fovRad / 2)
+                    const baseRadius = Math.max(projH, projH * aspect) * 1.5 // Margem para preencher os cantos
+
+                    for (let i = 0; i < particleCount; i++) {
+                        const t = i / particleCount
+                        
+                        const ox = originalPositions[i * 3]
+                        const oy = originalPositions[i * 3 + 1]
+                        const oz = originalPositions[i * 3 + 2]
+
+                        // Espiral limpa e direta
+                        const angle = t * Math.PI * 14 + time * 2.5 * spinDir
+
+                        const depth = vortexFrontDist + t * vortexLength
+                        const radius = baseRadius
+
+                        const vx = Math.cos(angle) * radius
+                        const vy = Math.sin(angle) * radius
+                        const vz = camera.position.z - depth
+
+                        posArray[i * 3]     = ox + (vx - ox) * intensity
+                        posArray[i * 3 + 1] = oy + (vy - oy) * intensity
+                        posArray[i * 3 + 2] = oz + (vz - oz) * intensity
+                    }
+                    particles.geometry.attributes.position.needsUpdate = true
+                } else if (wasVortexActive) {
+                    // Restaura posições originais uma única vez após o tunnel
+                    wasVortexActive = false
+                    for (let i = 0; i < particleCount * 3; i++) {
+                        posArray[i] = originalPositions[i]
+                    }
+                    particles.geometry.attributes.position.needsUpdate = true
+                }
+            }
+            // ──────────────────────────────────────────────────────────────
 
             // Câmera mergulha para frente e oscila levemente no eixo Y
             const camScrollZ = scrollY * 0.05

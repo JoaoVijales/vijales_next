@@ -22,19 +22,9 @@ const MainWrapper = styled.div`
   transform-style: preserve-3d;
 `;
 
-const arrowBounceDown = keyframes`
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(4px); }
-`;
-
-const arrowBounceUp = keyframes`
-  0%, 100% { transform: translateY(0); }
-  50%       { transform: translateY(-4px); }
-`;
-
-const ScrollIndicator = styled.div<{ $visible: boolean; $top: boolean }>`
+const VortexWrapper = styled.div<{ $visible: boolean; $top: boolean }>`
   position: fixed;
-  ${props => props.$top ? 'top: 2rem;' : 'bottom: 2rem;'}
+  ${props => props.$top ? 'top: 1.5rem;' : 'bottom: 1.5rem;'}
   left: 50%;
   transform: translateX(-50%);
   z-index: 200;
@@ -43,49 +33,88 @@ const ScrollIndicator = styled.div<{ $visible: boolean; $top: boolean }>`
   align-items: center;
   gap: 0.5rem;
   opacity: ${props => props.$visible ? 1 : 0};
-  transition: opacity 0.4s ease;
+  transition: opacity 0.35s ease;
   pointer-events: none;
+
+  svg {
+    width: clamp(80px, 10vmin, 130px);
+    height: clamp(80px, 10vmin, 130px);
+  }
 `;
 
-const ScrollLabel = styled.span`
+const VortexLabel = styled.span`
   font-family: var(--font-orbitron), sans-serif;
-  font-size: 0.55rem;
+  font-size: clamp(0.45rem, 0.8vmin, 0.6rem);
   letter-spacing: 3px;
   text-transform: uppercase;
   color: #ff4500;
   text-shadow: 0 0 8px #ff4500;
-  display: block;
 `;
 
-const ScrollTrack = styled.div`
-  width: 140px;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 69, 0, 0.2);
-  border-radius: 2px;
-  overflow: hidden;
-  position: relative;
-`;
+// Circunferência para r=38: 2π×38 ≈ 238.8
+const RING_CIRCUMFERENCE = 238.8;
 
-const ScrollFill = styled.div<{ $progress: number }>`
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: ${props => Math.round(props.$progress * 100)}%;
-  background: #ff4500;
-  box-shadow: 0 0 6px #ff4500, 0 0 14px #ff450066;
-  transition: width 0.08s linear;
-  border-radius: 2px;
-`;
+interface VortexProps {
+  progress: number;
+  isUp: boolean;
+}
 
-const ScrollArrow = styled.div<{ $up: boolean }>`
-  color: #ff4500;
-  text-shadow: 0 0 8px #ff4500;
-  font-size: 0.9rem;
-  line-height: 1;
-  animation: ${props => props.$up ? arrowBounceUp : arrowBounceDown} 1s ease-in-out infinite;
-`;
+function VortexIndicator({ progress, isUp }: VortexProps) {
+  const offset = RING_CIRCUMFERENCE * (1 - progress);
+  return (
+    <VortexWrapper $visible={progress > 0.03} $top={isUp}>
+      {isUp && <VortexLabel>seção anterior</VortexLabel>}
+      <svg
+        viewBox="0 0 100 100"
+        style={{ overflow: 'visible' }}
+        aria-hidden="true"
+      >
+        {/* Anel de fundo */}
+        <circle cx="50" cy="50" r="38" fill="none" stroke="rgba(255,69,0,0.1)" strokeWidth="2.5" />
+
+        {/* Anel externo girando — vórtice */}
+        <g style={{ animation: 'vortexSpin 1.8s linear infinite', transformOrigin: '50px 50px' }}>
+          <circle
+            cx="50" cy="50" r="45"
+            fill="none"
+            stroke="rgba(255,69,0,0.35)"
+            strokeWidth="1.5"
+            strokeDasharray="5 9"
+          />
+        </g>
+
+        {/* Arco de progresso */}
+        <circle
+          cx="50" cy="50" r="38"
+          fill="none"
+          stroke="#ff4500"
+          strokeWidth="3"
+          strokeDasharray={RING_CIRCUMFERENCE}
+          strokeDashoffset={offset}
+          strokeLinecap="round"
+          transform="rotate(-90 50 50)"
+          style={{
+            transition: 'stroke-dashoffset 0.08s linear',
+            filter: 'drop-shadow(0 0 5px #ff4500) drop-shadow(0 0 12px #ff450088)',
+          }}
+        />
+
+        {/* Seta central */}
+        <text
+          x="50" y="58"
+          textAnchor="middle"
+          fill="#ff4500"
+          fontSize="22"
+          fontFamily="monospace"
+          style={{ filter: 'drop-shadow(0 0 6px #ff4500)' }}
+        >
+          {isUp ? '↑' : '↓'}
+        </text>
+      </svg>
+      {!isUp && <VortexLabel>próxima seção</VortexLabel>}
+    </VortexWrapper>
+  );
+}
 
 const SectionWrapper = styled.div<{ $offset: number; $tunneling: boolean }>`
   position: absolute;
@@ -120,7 +149,7 @@ const SectionWrapper = styled.div<{ $offset: number; $tunneling: boolean }>`
   -ms-overflow-style: none;
   &::-webkit-scrollbar { display: none; }
 
-  /* Seção: emerge do tunnel com materialize */
+  /* Seção emerge do tunnel com glitch + drawIn em cascata */
   section {
     padding: 80px 10% 4rem 10%;
     box-sizing: border-box;
@@ -132,18 +161,18 @@ const SectionWrapper = styled.div<{ $offset: number; $tunneling: boolean }>`
     position: relative;
     z-index: 2;
     opacity: 0;
-    will-change: opacity, filter;
+    will-change: opacity, filter, transform;
 
     &.active {
-      animation: materialize 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      animation: materialize 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 
-    /* Filhos diretos em cascata — contentReveal global */
-    &.active > *:nth-child(1) { animation: contentReveal 0.5s ease-out 0.1s both; }
-    &.active > *:nth-child(2) { animation: contentReveal 0.5s ease-out 0.2s both; }
-    &.active > *:nth-child(3) { animation: contentReveal 0.5s ease-out 0.3s both; }
-    &.active > *:nth-child(4) { animation: contentReveal 0.5s ease-out 0.4s both; }
-    &.active > *:nth-child(5) { animation: contentReveal 0.5s ease-out 0.5s both; }
+    /* Filhos revelados da esquerda em cascata — feel de dados carregando */
+    &.active > *:nth-child(1) { animation: drawIn 0.45s ease-out 0.1s  both; }
+    &.active > *:nth-child(2) { animation: drawIn 0.45s ease-out 0.2s  both; }
+    &.active > *:nth-child(3) { animation: drawIn 0.45s ease-out 0.3s  both; }
+    &.active > *:nth-child(4) { animation: drawIn 0.45s ease-out 0.4s  both; }
+    &.active > *:nth-child(5) { animation: drawIn 0.45s ease-out 0.5s  both; }
   }
 
   @media (max-height: 700px) {
@@ -168,20 +197,12 @@ function HomeInner() {
   const setRef3 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[3] = el }, [sectionRefs])
 
   const isGoingUp = scrollDirection === -1;
-  const showIndicator = scrollProgress > 0.03;
   const isTunneling = tunnelRef.current.active;
 
   return (
     <MainWrapper ref={containerRef}>
       <ThreeBackground />
-      <ScrollIndicator $visible={showIndicator} $top={isGoingUp} aria-hidden="true">
-        {isGoingUp && <ScrollArrow $up={true}>↑</ScrollArrow>}
-        <ScrollLabel>{isGoingUp ? 'seção anterior' : 'próxima seção'}</ScrollLabel>
-        <ScrollTrack>
-          <ScrollFill $progress={scrollProgress} />
-        </ScrollTrack>
-        {!isGoingUp && <ScrollArrow $up={false}>↓</ScrollArrow>}
-      </ScrollIndicator>
+      <VortexIndicator progress={scrollProgress} isUp={isGoingUp} />
       <Sidebar activeIndex={activeSection} onNavigate={setActiveSection} />
 
       <SectionWrapper $offset={0 - activeSection} $tunneling={isTunneling} ref={setRef0}>

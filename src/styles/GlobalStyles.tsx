@@ -96,19 +96,27 @@ const StyledGlobalStyles = createGlobalStyle<{ $isHome: boolean }>`
     }
   }
 
-  /* Seção emerge do tunnel — brightness flash que estabiliza */
+  /* Seção emerge do tunnel — glitch digital sem desvio de matiz */
   @keyframes materialize {
-    0%   { opacity: 0; filter: brightness(8) blur(16px) saturate(4); }
-    25%  { opacity: 0.7; filter: brightness(2.5) blur(6px) saturate(2); }
-    65%  { opacity: 0.95; filter: brightness(1.3) blur(1px) saturate(1.2); }
-    100% { opacity: 1; filter: brightness(1) blur(0px) saturate(1); }
+    0%   { opacity: 0;    filter: brightness(8) contrast(3) saturate(3);  transform: translateX(0); }
+    6%   { opacity: 0.45; filter: brightness(6) contrast(2) saturate(4);  transform: translateX(-8px); }
+    11%  { opacity: 0.35; filter: brightness(7) contrast(3) saturate(5);  transform: translateX(8px); }
+    16%  { opacity: 0.6;  filter: brightness(4) contrast(2) saturate(3);  transform: translateX(-4px); }
+    22%  { opacity: 0.75; filter: brightness(2) contrast(1.5) saturate(2); transform: translateX(0); }
+    50%  { opacity: 0.9;  filter: brightness(1.4) contrast(1.1); }
+    100% { opacity: 1;    filter: brightness(1) contrast(1);               transform: translateX(0); }
   }
 
-  /* Filhos da seção se materializam em cascata após o tunnel */
-  @keyframes contentReveal {
-    0%   { opacity: 0; transform: translateY(18px); filter: blur(6px) brightness(3); }
-    40%  { filter: blur(2px) brightness(1.5); }
-    100% { opacity: 1; transform: translateY(0); filter: blur(0) brightness(1); }
+  /* Elementos revelados da esquerda — feel de dados sendo carregados */
+  @keyframes drawIn {
+    0%   { clip-path: inset(0 100% 0 0); filter: brightness(4); }
+    60%  { clip-path: inset(0 0% 0 0);   filter: brightness(1.8); }
+    100% { clip-path: inset(0 0% 0 0);   filter: brightness(1); }
+  }
+
+  /* Anel externo girando no vórtice de scroll */
+  @keyframes vortexSpin {
+    to { transform: rotate(360deg); }
   }
 
   @media (prefers-reduced-motion: reduce) {
