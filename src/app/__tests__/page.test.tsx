@@ -8,9 +8,24 @@ jest.mock('@/hooks/usePageScroll', () => ({
   usePageScroll: () => ({
     activeSection: 0,
     setActiveSection: jest.fn(),
+    scrollProgress: 0,
+    scrollDirection: 0,
     containerRef: { current: null },
     sectionRefs: { current: [] },
   }),
+}))
+
+jest.mock('@/context/TransitionContext', () => ({
+  TransitionProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useTransition: () => ({
+    tunnelRef: { current: { active: false, progress: 0, direction: 1 } },
+    startTunnel: jest.fn(),
+  }),
+}))
+
+jest.mock('@/components/effects/ThreeBackground', () => ({
+  __esModule: true,
+  default: () => <div data-testid="three-background" />,
 }))
 
 jest.mock('@/components/layout/Sidebar', () => ({

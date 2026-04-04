@@ -2,9 +2,11 @@
 
 import React, { useEffect, useRef } from 'react'
 import * as THREE from 'three'
+import { useTransition } from '@/context/TransitionContext'
 
 export default function ThreeBackground() {
     const mountRef = useRef<HTMLDivElement>(null)
+    const { tunnelRef } = useTransition()
 
     useEffect(() => {
         if (!mountRef.current) return
@@ -238,19 +240,37 @@ export default function ThreeBackground() {
 
             scrollY += (targetScrollY - scrollY) * 0.1
 
-            if (particles) {
-                //particles.rotation.y += 0.005
-            }
+            // ── Tunnel effect ──────────────────────────────────────────────
+            const tunnel = tunnelRef.current
+            // intensity: 0→1→0 com curva sin ao longo do progresso do tunnel
+            const intensity = tunnel.active
+                ? Math.sin(tunnel.progress * Math.PI)
+                : 0
 
-            gridRunners.forEach(runner => runner.update())
+            // Runners aceleram (quanto mais deep no tunnel, mais rápido)
+            gridRunners.forEach(runner => runner.update(intensity * 28))
 
+            // Câmera mergulha para frente e oscila levemente no eixo Y
             const camScrollZ = scrollY * 0.05
-            camera.position.z = 50 - camScrollZ
+            const tunnelZ = intensity * 120
+            camera.position.z = 50 - camScrollZ - tunnelZ
 
-            camera.position.x += (mouseX * 10 - camera.position.x) * 0.05
-            camera.position.y += (-mouseY * 2 + 10 - camera.position.y) * 0.05
+            // Mouse tracking desacelera durante tunnel para não brigar com o efeito
+            const mouseEase = 0.05 * (1 - intensity * 0.8)
+            camera.position.x += (mouseX * 10 - camera.position.x) * mouseEase
+            camera.position.y += (-mouseY * 2 + 10 - camera.position.y) * mouseEase
 
             camera.lookAt(0, 0, camera.position.z - 100)
+
+            // FOV abre durante o mergulho (efeito de aceleração)
+            camera.fov = 75 + intensity * 25
+            camera.updateProjectionMatrix()
+
+            // Fog reduz no pico do tunnel — grid fica totalmente visível
+            if (scene.fog instanceof THREE.FogExp2) {
+                scene.fog.density = 0.0015 * (1 - intensity * 0.9)
+            }
+            // ──────────────────────────────────────────────────────────────
 
             renderer.render(scene, camera)
 

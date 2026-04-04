@@ -138,6 +138,18 @@ jest.mock('three', () => {
   }
 })
 
+// ─── TransitionContext Mock ───────────────────────────────────────────────────
+
+import { useRef } from 'react'
+
+jest.mock('@/context/TransitionContext', () => ({
+  useTransition: () => ({
+    tunnelRef: { current: { active: false, progress: 0, direction: 1 } },
+    startTunnel: jest.fn(),
+  }),
+  TransitionProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}))
+
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 import ThreeBackground from '../ThreeBackground'

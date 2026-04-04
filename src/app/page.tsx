@@ -4,6 +4,8 @@
 import { useCallback } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { usePageScroll } from '@/hooks/usePageScroll'
+import { TransitionProvider, useTransition } from '@/context/TransitionContext'
+import ThreeBackground from '@/components/effects/ThreeBackground'
 import Sidebar from '@/components/layout/Sidebar'
 import HeroSection from '@/components/sections/HeroSection'
 import ServicesSection from '@/components/sections/ServicesSection'
@@ -85,7 +87,7 @@ const ScrollArrow = styled.div<{ $up: boolean }>`
   animation: ${props => props.$up ? arrowBounceUp : arrowBounceDown} 1s ease-in-out infinite;
 `;
 
-const SectionWrapper = styled.div<{ $offset: number }>`
+const SectionWrapper = styled.div<{ $offset: number; $tunneling: boolean }>`
   position: absolute;
   top: 0;
   left: 0;
@@ -103,9 +105,9 @@ const SectionWrapper = styled.div<{ $offset: number }>`
   opacity: ${props => props.$offset === 0 ? 1 : 0};
   visibility: ${props => props.$offset === 0 ? 'visible' : 'hidden'};
   
-  transition: 
-    opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1),
-    transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: ${props => props.$tunneling
+    ? 'opacity 0.3s ease'
+    : 'opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)'};
 
   transform: ${props => {
     if (props.$offset === 0) return 'translate3d(0, 0, 0) rotateX(0deg)';
@@ -154,9 +156,16 @@ const SectionWrapper = styled.div<{ $offset: number }>`
   }
 `;
 
-export default function Home() {
+function HomeInner() {
   const SECTION_COUNT = 4;
-  const { activeSection, setActiveSection, scrollProgress, scrollDirection, containerRef, sectionRefs } = usePageScroll(SECTION_COUNT);
+  const { startTunnel, tunnelRef } = useTransition();
+
+  const onTransition = useCallback(
+    (dir: 1 | -1, cb: () => void) => startTunnel(dir, cb),
+    [startTunnel]
+  );
+
+  const { activeSection, setActiveSection, scrollProgress, scrollDirection, containerRef, sectionRefs } = usePageScroll(SECTION_COUNT, onTransition);
 
   const setRef0 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[0] = el }, [sectionRefs])
   const setRef1 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[1] = el }, [sectionRefs])
@@ -165,9 +174,11 @@ export default function Home() {
 
   const isGoingUp = scrollDirection === -1;
   const showIndicator = scrollProgress > 0.03;
+  const isTunneling = tunnelRef.current.active;
 
   return (
     <MainWrapper ref={containerRef}>
+      <ThreeBackground />
       <ScrollIndicator $visible={showIndicator} $top={isGoingUp} aria-hidden="true">
         {isGoingUp && <ScrollArrow $up={true}>↑</ScrollArrow>}
         <ScrollLabel>{isGoingUp ? 'seção anterior' : 'próxima seção'}</ScrollLabel>
@@ -178,21 +189,29 @@ export default function Home() {
       </ScrollIndicator>
       <Sidebar activeIndex={activeSection} onNavigate={setActiveSection} />
 
-      <SectionWrapper $offset={0 - activeSection} ref={setRef0}>
+      <SectionWrapper $offset={0 - activeSection} $tunneling={isTunneling} ref={setRef0}>
         <HeroSection isActive={activeSection === 0} />
       </SectionWrapper>
 
-      <SectionWrapper $offset={1 - activeSection} ref={setRef1}>
+      <SectionWrapper $offset={1 - activeSection} $tunneling={isTunneling} ref={setRef1}>
         <ServicesSection isActive={activeSection === 1} />
       </SectionWrapper>
 
-      <SectionWrapper $offset={2 - activeSection} ref={setRef2}>
+      <SectionWrapper $offset={2 - activeSection} $tunneling={isTunneling} ref={setRef2}>
         <PortfolioSection isActive={activeSection === 2} />
       </SectionWrapper>
 
-      <SectionWrapper $offset={3 - activeSection} ref={setRef3}>
+      <SectionWrapper $offset={3 - activeSection} $tunneling={isTunneling} ref={setRef3}>
         <ContactSection isActive={activeSection === 3} />
       </SectionWrapper>
     </MainWrapper>
+  )
+}
+
+export default function Home() {
+  return (
+    <TransitionProvider>
+      <HomeInner />
+    </TransitionProvider>
   )
 }

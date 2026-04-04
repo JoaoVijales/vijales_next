@@ -1,6 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 
-export function usePageScroll(sectionCount: number) {
+export function usePageScroll(
+    sectionCount: number,
+    onTransition?: (direction: 1 | -1, onSectionChange: () => void) => void
+) {
     const [activeSection, setActiveSection] = useState(0);
     const [isScrolling, setIsScrolling] = useState(false);
     const [scrollProgress, setScrollProgress] = useState(0);
@@ -113,13 +116,18 @@ export function usePageScroll(sectionCount: number) {
                     isScrollingRef.current = true;
                     setIsScrolling(true);
                     setScrollProgress(1);
-                    setActiveSection(prev => prev + 1);
                     scrollAccumulator.current = 0;
                     resetTilt();
+                    const doChange = () => setActiveSection(prev => prev + 1);
+                    if (onTransition) {
+                        onTransition(1, doChange);
+                    } else {
+                        doChange();
+                    }
                     setTimeout(() => {
                         isScrollingRef.current = false;
                         setIsScrolling(false);
-                    }, 1000);
+                    }, 1200);
                 }
             }
         } else if (normalizedDelta < 0) {
@@ -128,13 +136,18 @@ export function usePageScroll(sectionCount: number) {
                     isScrollingRef.current = true;
                     setIsScrolling(true);
                     setScrollProgress(1);
-                    setActiveSection(prev => prev - 1);
                     scrollAccumulator.current = 0;
                     resetTilt();
+                    const doChange = () => setActiveSection(prev => prev - 1);
+                    if (onTransition) {
+                        onTransition(-1, doChange);
+                    } else {
+                        doChange();
+                    }
                     setTimeout(() => {
                         isScrollingRef.current = false;
                         setIsScrolling(false);
-                    }, 1000);
+                    }, 1200);
                 }
             }
         }

@@ -8,7 +8,6 @@ import GlobalStyles from "@/styles/GlobalStyles";
 // Sidebar moved to page.tsx
 import Footer from "@/components/layout/Footer";
 import BackgroundEffects from "@/components/effects/BackgroundEffects";
-import ThreeBackground from "@/components/effects/ThreeBackground";
 
 const orbitron = Orbitron({
   variable: "--font-orbitron",
@@ -55,8 +54,7 @@ export default function RootLayout({
 
 
           <BackgroundEffects />
-          <ThreeBackground />
-          {/* Sidebar moved to page.tsx for specific scroll control */}
+          {/* ThreeBackground moved to page.tsx — precisa do TransitionContext */}
           <main style={{ position: 'relative', zIndex: 2 }}>
             {children}
           </main>

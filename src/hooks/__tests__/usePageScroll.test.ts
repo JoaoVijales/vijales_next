@@ -96,4 +96,13 @@ describe('usePageScroll', () => {
     const { result } = renderHook(() => usePageScroll(4))
     expect([-1, 0, 1]).toContain(result.current.scrollDirection)
   })
+
+  it('aceita onTransition opcional sem quebrar', () => {
+    const onTransition = jest.fn((_dir: number, cb: () => void) => cb())
+    expect(() => renderHook(() => usePageScroll(4, onTransition))).not.toThrow()
+  })
+
+  it('sem onTransition mantém comportamento original', () => {
+    expect(() => renderHook(() => usePageScroll(4))).not.toThrow()
+  })
 })
