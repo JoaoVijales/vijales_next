@@ -105,27 +105,22 @@ const SectionWrapper = styled.div<{ $offset: number; $tunneling: boolean }>`
   opacity: ${props => props.$offset === 0 ? 1 : 0};
   visibility: ${props => props.$offset === 0 ? 'visible' : 'hidden'};
   
-  transition: ${props => props.$tunneling
-    ? 'opacity 0.3s ease'
-    : 'opacity 1.2s cubic-bezier(0.2, 0.8, 0.2, 1), transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1)'};
+  /* Tunnel substitui o flip — apenas opacity + escala de profundidade */
+  transition: opacity 0.4s ease;
 
-  transform: ${props => {
-    if (props.$offset === 0) return 'translate3d(0, 0, 0) rotateX(0deg)';
-    if (props.$offset < 0) return 'translate3d(0, -100px, -200px) rotateX(45deg)'; // Past (Top)
-    return 'translate3d(0, 100px, -200px) rotateX(-45deg)'; // Future (Bottom)
-  }};
+  transform: ${props =>
+    props.$offset === 0
+      ? 'translateZ(0) scale(1)'
+      : 'translateZ(-180px) scale(0.94)'
+  };
 
-  overflow-y: auto; /* Enable internal scrolling */
+  overflow-y: auto;
   overflow-x: hidden;
-  
-  /* Hide scrollbar but allow scrolling */
   scrollbar-width: none;
   -ms-overflow-style: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
+  &::-webkit-scrollbar { display: none; }
 
-  /* Target internal sections for specific home behavior */
+  /* Seção: emerge do tunnel com materialize */
   section {
     padding: 80px 10% 4rem 10%;
     box-sizing: border-box;
@@ -136,23 +131,23 @@ const SectionWrapper = styled.div<{ $offset: number; $tunneling: boolean }>`
     justify-content: center;
     position: relative;
     z-index: 2;
-    
-    /* Animation base */
     opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out, filter 0.5s ease-out;
-    will-change: opacity, transform;
+    will-change: opacity, filter;
 
     &.active {
-      opacity: 1;
-      transform: translateY(0);
+      animation: materialize 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
+
+    /* Filhos diretos em cascata — contentReveal global */
+    &.active > *:nth-child(1) { animation: contentReveal 0.5s ease-out 0.1s both; }
+    &.active > *:nth-child(2) { animation: contentReveal 0.5s ease-out 0.2s both; }
+    &.active > *:nth-child(3) { animation: contentReveal 0.5s ease-out 0.3s both; }
+    &.active > *:nth-child(4) { animation: contentReveal 0.5s ease-out 0.4s both; }
+    &.active > *:nth-child(5) { animation: contentReveal 0.5s ease-out 0.5s both; }
   }
 
   @media (max-height: 700px) {
-    section {
-      justify-content: flex-start;
-    }
+    section { justify-content: flex-start; }
   }
 `;
 

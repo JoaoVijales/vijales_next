@@ -59,8 +59,6 @@ const Tagline = styled.div`
   text-transform: uppercase;
   letter-spacing: 6px;
   font-weight: 400;
-  opacity: 0;
-  animation: fadeInUp 1s ease-out 0.5s forwards;
   display: block;
 `;
 
@@ -72,8 +70,6 @@ const Title = styled.h1`
   text-transform: uppercase;
   letter-spacing: clamp(10px, 2vw, 30px);
   position: relative;
-  opacity: 0;
-  animation: fadeInUp 1s ease-out 0.8s forwards;
   text-shadow: 0 0 30px rgba(255, 69, 0, 0.5), 0 0 60px rgba(255, 69, 0, 0.3);
 
   &::before {
@@ -96,8 +92,6 @@ const Subtitle = styled.p`
   line-height: 1.8;
   font-weight: 300;
   letter-spacing: 1px;
-  opacity: 0;
-  animation: fadeInUp 1s ease-out 1.1s forwards;
 
   @media (max-width: 768px) {
     margin-bottom: 2rem;
@@ -125,8 +119,6 @@ const CtaButton = styled.a`
   transition: all 0.4s;
   clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
   box-shadow: 0 0 20px rgba(255, 69, 0, 0.3);
-  opacity: 0;
-  animation: fadeInUp 1s ease-out 0.9s forwards;
   color: #00C8FF;
 
   span {

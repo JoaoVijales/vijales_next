@@ -1,19 +1,8 @@
 'use client'
 
 import React, { useRef } from 'react'
-import styled, { keyframes, css } from 'styled-components'
+import styled from 'styled-components'
 import { useSVGAnimate } from '@/hooks/useSVGAnimate'
-
-const flipIn = keyframes`
-  0% {
-    opacity: 0;
-    transform: perspective(1000px) rotateX(-90deg) translateY(50px);
-  }
-  100% {
-    opacity: 1;
-    transform: perspective(1000px) rotateX(0deg) translateY(0);
-  }
-`;
 
 const ServicesWrapper = styled.section`
   padding: 4rem 10%;
@@ -69,7 +58,7 @@ const SectionHeader = styled.div`
   }
 `;
 
-const Card = styled.div<{ $isVisible?: boolean }>`
+const Card = styled.div`
   background: linear-gradient(135deg, rgba(20, 20, 20, 0.9), rgba(10, 10, 10, 0.9));
   border: 2px solid #0c0c0c66;
   padding: 1.5rem;
@@ -85,14 +74,6 @@ const Card = styled.div<{ $isVisible?: boolean }>`
     padding: 1rem;
     gap: 0.5rem;
   }
-  
-  /* Initial state for animation */
-  opacity: 0; 
-  transform: perspective(1000px) rotateX(-90deg);
-
-  ${props => props.$isVisible && css`
-    animation: ${flipIn} 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-  `}
   
   &::before {
     content: '';
@@ -191,17 +172,15 @@ interface FeatureProps {
   title: string;
   description: string;
   isVisible: boolean;
-  index: number;
 }
 
-function FeatureCard({ icon, title, description, isVisible, index }: FeatureProps) {
+function FeatureCard({ icon, title, description, isVisible }: FeatureProps) {
   const svgRef = useRef<SVGSVGElement>(null)
 
-  // Apply SVG animation hook to the cloned icon if it's an SVG
   useSVGAnimate(svgRef, isVisible)
 
   return (
-    <Card className="feature-card" $isVisible={isVisible} style={{ animationDelay: `${index * 0.4}s` }}>
+    <Card className="feature-card">
       <IconWrapper>
         {React.cloneElement(icon as React.ReactElement, { ref: svgRef } as any)}
       </IconWrapper>
@@ -226,7 +205,6 @@ export default function ServicesSection({ isActive = false }: ServicesSectionPro
 
       <FeatureCard
         isVisible={isActive}
-        index={0}
         title="Soluções Personalizadas"
         description="Desenvolvimento sob medida com código limpo e otimizado, criando aplicações que atendem exatamente às necessidades do seu negócio com performance excepcional."
         icon={
@@ -257,7 +235,6 @@ export default function ServicesSection({ isActive = false }: ServicesSectionPro
 
       <FeatureCard
         isVisible={isActive}
-        index={1}
         title="Design Responsivo e Moderno"
         description="Interfaces elegantes que funcionam perfeitamente em qualquer dispositivo, proporcionando uma experiência fluida e profissional para seus usuários."
         icon={
@@ -289,7 +266,6 @@ export default function ServicesSection({ isActive = false }: ServicesSectionPro
 
       <FeatureCard
         isVisible={isActive}
-        index={2}
         title="Suporte Completo"
         description="Integração de sistemas, manutenção contínua e arquitetura escalável para garantir que seu projeto cresça junto com seu negócio sem preocupações."
         icon={

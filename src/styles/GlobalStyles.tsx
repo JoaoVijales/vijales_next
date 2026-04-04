@@ -96,6 +96,21 @@ const StyledGlobalStyles = createGlobalStyle<{ $isHome: boolean }>`
     }
   }
 
+  /* Seção emerge do tunnel — brightness flash que estabiliza */
+  @keyframes materialize {
+    0%   { opacity: 0; filter: brightness(8) blur(16px) saturate(4); }
+    25%  { opacity: 0.7; filter: brightness(2.5) blur(6px) saturate(2); }
+    65%  { opacity: 0.95; filter: brightness(1.3) blur(1px) saturate(1.2); }
+    100% { opacity: 1; filter: brightness(1) blur(0px) saturate(1); }
+  }
+
+  /* Filhos da seção se materializam em cascata após o tunnel */
+  @keyframes contentReveal {
+    0%   { opacity: 0; transform: translateY(18px); filter: blur(6px) brightness(3); }
+    40%  { filter: blur(2px) brightness(1.5); }
+    100% { opacity: 1; transform: translateY(0); filter: blur(0) brightness(1); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
