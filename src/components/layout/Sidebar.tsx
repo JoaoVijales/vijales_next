@@ -22,8 +22,14 @@ const SidebarWrapper = styled.aside`
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   transition: all 0.5s ease;
 
-  @media (max-width: 1024px) {
+  @media (max-width: 768px) {
     display: none;
+  }
+
+  @media (max-width: 1024px) {
+    gap: 1.5rem;
+    padding: 1rem 0.5rem;
+    right: 1rem;
   }
 `
 
@@ -73,6 +79,10 @@ const SocialLinks = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
 `
 
 const SocialIcon = styled.a`
@@ -94,6 +104,10 @@ const Line = styled.div`
   width: 1px;
   height: 40px;
   background: linear-gradient(to bottom, transparent, rgba(255, 69, 0, 0.5), transparent);
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
 `
 
 

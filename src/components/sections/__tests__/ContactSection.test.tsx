@@ -56,6 +56,11 @@ describe('ContactSection – WhatsApp CTA', () => {
     expect(screen.queryByRole('button', { name: /enviar/i })).not.toBeInTheDocument()
   })
 
+  it('não exibe lista de benefícios para manter o CTA focado', () => {
+    render(<ContactSection />)
+    expect(screen.queryByRole('list')).not.toBeInTheDocument()
+  })
+
   it('aplica isActive sem erros', () => {
     const { rerender } = render(<ContactSection isActive={false} />)
     rerender(<ContactSection isActive={true} />)

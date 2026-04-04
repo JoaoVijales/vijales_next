@@ -126,7 +126,7 @@ const CtaButton = styled.a`
   clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
   box-shadow: 0 0 20px rgba(255, 69, 0, 0.3);
   opacity: 0;
-  animation: fadeInUp 1s ease-out 1.4s forwards;
+  animation: fadeInUp 1s ease-out 0.9s forwards;
   color: #00C8FF;
 
   span {

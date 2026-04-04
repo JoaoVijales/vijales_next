@@ -20,10 +20,10 @@ const PortfolioWrapper = styled.section`
 
 const SectionHeader = styled.div`
   text-align: center;
-  margin-bottom: 6rem;
+  margin-bottom: 3rem;
 
   @media (max-width: 768px) {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
   }
 
   .v-icon {
@@ -68,15 +68,15 @@ const SectionHeader = styled.div`
 `;
 
 const Grid = styled.div`
-  padding-inline: 5rem;
+  padding-inline: 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 4rem;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
 
   @media (max-width: 1024px) {
-    padding-inline: 1rem;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
+    padding-inline: 0;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
   }
 
   @media (max-width: 768px) {

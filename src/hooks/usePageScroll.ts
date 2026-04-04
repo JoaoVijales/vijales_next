@@ -3,6 +3,8 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 export function usePageScroll(sectionCount: number) {
     const [activeSection, setActiveSection] = useState(0);
     const [isScrolling, setIsScrolling] = useState(false);
+    const [scrollProgress, setScrollProgress] = useState(0);
+    const [scrollDirection, setScrollDirection] = useState<-1 | 0 | 1>(0);
     const containerRef = useRef<HTMLDivElement>(null);
     const sectionRefs = useRef<(HTMLElement | null)[]>([]);
 
@@ -99,6 +101,10 @@ export function usePageScroll(sectionCount: number) {
             scrollAccumulator.current = normalizedDelta;
         }
 
+        // Update progress and direction immediately on every scroll event
+        setScrollProgress(Math.min(Math.abs(scrollAccumulator.current) / SCROLL_THRESHOLD, 1));
+        setScrollDirection(scrollAccumulator.current > 0 ? 1 : -1);
+
         applyTilt(scrollAccumulator.current);
 
         if (normalizedDelta > 0) {
@@ -106,6 +112,7 @@ export function usePageScroll(sectionCount: number) {
                 if (scrollAccumulator.current > SCROLL_THRESHOLD) {
                     isScrollingRef.current = true;
                     setIsScrolling(true);
+                    setScrollProgress(1);
                     setActiveSection(prev => prev + 1);
                     scrollAccumulator.current = 0;
                     resetTilt();
@@ -120,6 +127,7 @@ export function usePageScroll(sectionCount: number) {
                 if (scrollAccumulator.current < -SCROLL_THRESHOLD) {
                     isScrollingRef.current = true;
                     setIsScrolling(true);
+                    setScrollProgress(1);
                     setActiveSection(prev => prev - 1);
                     scrollAccumulator.current = 0;
                     resetTilt();
@@ -170,7 +178,7 @@ export function usePageScroll(sectionCount: number) {
         window.addEventListener('touchmove', handleTouchMove, { passive: false });
         window.addEventListener('touchend', handleTouchEnd);
 
-        // Decay/Reset accumulator if user stops scrolling without switching
+        // Decay accumulator when user stops scrolling without switching section
         const interval = setInterval(() => {
             if (!isScrolling && Math.abs(scrollAccumulator.current) > 0) {
                 scrollAccumulator.current *= 0.85;
@@ -178,8 +186,11 @@ export function usePageScroll(sectionCount: number) {
                 if (Math.abs(scrollAccumulator.current) < 0.5) {
                     scrollAccumulator.current = 0;
                     resetTilt();
+                    setScrollProgress(0);
+                    setScrollDirection(0);
                 } else {
                     applyTilt(scrollAccumulator.current);
+                    setScrollProgress(Math.abs(scrollAccumulator.current) / SCROLL_THRESHOLD);
                 }
             }
         }, 30);
@@ -197,7 +208,9 @@ export function usePageScroll(sectionCount: number) {
     useEffect(() => {
         resetTilt();
         scrollAccumulator.current = 0;
+        setScrollProgress(0);
+        setScrollDirection(0);
     }, [activeSection]);
 
-    return { activeSection, setActiveSection, containerRef, sectionRefs };
+    return { activeSection, setActiveSection, scrollProgress, scrollDirection, containerRef, sectionRefs };
 }

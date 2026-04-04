@@ -100,11 +100,17 @@ const BackLink = styled.a`
   font-weight: 600;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.85);
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color 0.2s, opacity 0.2s;
+  border: 1px solid rgba(99,102,241,0.4);
+  padding: 0.4rem 0.8rem;
+  border-radius: 2px;
 
-  &:hover { color: #6366f1; }
+  &:hover {
+    color: #6366f1;
+    border-color: #6366f1;
+  }
 `
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
@@ -583,7 +589,7 @@ const FooterBack = styled.a`
   font-size: 0.75rem;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.6);
   text-decoration: none;
   transition: color 0.2s;
 
