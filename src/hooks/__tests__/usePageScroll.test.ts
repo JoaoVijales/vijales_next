@@ -75,4 +75,25 @@ describe('usePageScroll', () => {
     })
     expect(result.current.activeSection).toBe(2)
   })
+
+  it('retorna scrollProgress inicial como 0', () => {
+    const { result } = renderHook(() => usePageScroll(4))
+    expect(result.current.scrollProgress).toBe(0)
+  })
+
+  it('scrollProgress é um número entre 0 e 1', () => {
+    const { result } = renderHook(() => usePageScroll(4))
+    expect(result.current.scrollProgress).toBeGreaterThanOrEqual(0)
+    expect(result.current.scrollProgress).toBeLessThanOrEqual(1)
+  })
+
+  it('retorna scrollDirection inicial como 0', () => {
+    const { result } = renderHook(() => usePageScroll(4))
+    expect(result.current.scrollDirection).toBe(0)
+  })
+
+  it('scrollDirection é -1, 0 ou 1', () => {
+    const { result } = renderHook(() => usePageScroll(4))
+    expect([-1, 0, 1]).toContain(result.current.scrollDirection)
+  })
 })

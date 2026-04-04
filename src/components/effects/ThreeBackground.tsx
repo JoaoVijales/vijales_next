@@ -182,7 +182,8 @@ export default function ThreeBackground() {
             const vertices = []
             const colors = []
 
-            for (let i = 0; i < 1500; i++) {
+            const particleCount = prefersReducedMotion ? 300 : 1500
+            for (let i = 0; i < particleCount; i++) {
                 const x = (Math.random() - 0.5) * 600
                 const y = (Math.random() - 0.5) * 400
                 const z = (Math.random() - 0.5) * 1000
@@ -257,10 +258,12 @@ export default function ThreeBackground() {
             if (Math.abs(scrollSpeed) < 0.01) scrollSpeed = 0
         }
 
+        const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
+
         const init = () => {
             // Scene
             scene = new THREE.Scene()
-            scene.fog = new THREE.FogExp2(0x000000, 0.0025)
+            scene.fog = new THREE.FogExp2(0x000000, 0.0015)
 
             // Camera
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -282,7 +285,7 @@ export default function ThreeBackground() {
             createParticles()
 
             // Grid Runners
-            const runnerCount = 20
+            const runnerCount = prefersReducedMotion ? 5 : 20
             for (let i = 0; i < runnerCount; i++) {
                 const startZ = -100 - Math.random() * 500
                 gridRunners.push(new GridRunner(scene, -30, 50, startZ))

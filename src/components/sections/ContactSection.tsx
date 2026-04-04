@@ -23,11 +23,6 @@ const float = keyframes`
   50%       { transform: translateY(-6px); }
 `
 
-const glowScan = keyframes`
-  0%   { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`
-
 const orbitPing = keyframes`
   0%   { transform: scale(1); opacity: 0.6; }
   100% { transform: scale(2.2); opacity: 0; }
@@ -147,34 +142,6 @@ const Tagline = styled.p`
   }
 `
 
-const BenefitsList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0 auto 2.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  max-width: 420px;
-  text-align: left;
-
-  li {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.7);
-    letter-spacing: 1px;
-    font-weight: 300;
-
-    &::before {
-      content: '▸';
-      color: #25D366;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-  }
-`
-
 const WhatsAppButtonWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -202,22 +169,6 @@ const WhatsAppButton = styled.a<{ $isActive?: boolean }>`
   clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
   animation: ${float} 3s ease-in-out infinite;
   animation-play-state: ${props => props.$isActive ? 'running' : 'paused'};
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(37, 211, 102, 0.15) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
-    animation: ${glowScan} 2.5s linear infinite;
-    animation-play-state: ${props => props.$isActive ? 'running' : 'paused'};
-    pointer-events: none;
-  }
 
   &:hover {
     background: #25D366;
@@ -328,13 +279,6 @@ export default function ContactSection({ isActive = false }: ContactSectionProps
           Pronto para transformar sua ideia em realidade? Fale diretamente
           comigo no WhatsApp — resposta rápida, sem burocracia.
         </Tagline>
-
-        <BenefitsList>
-          <li>Orçamento sem compromisso em minutos</li>
-          <li>Atendimento direto, sem intermediários</li>
-          <li>Projetos web sob medida para o seu negócio</li>
-          <li>Suporte ágil durante e após a entrega</li>
-        </BenefitsList>
 
         <WhatsAppButtonWrapper>
           <AvailabilityBadge $isActive={isActive}>

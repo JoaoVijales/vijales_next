@@ -2,7 +2,7 @@
 'use client'
 
 import { useCallback } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { usePageScroll } from '@/hooks/usePageScroll'
 import Sidebar from '@/components/layout/Sidebar'
 import HeroSection from '@/components/sections/HeroSection'
@@ -18,6 +18,71 @@ const MainWrapper = styled.div`
   overflow: hidden;
   perspective: 1500px; /* Deep perspective */
   transform-style: preserve-3d;
+`;
+
+const arrowBounceDown = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(4px); }
+`;
+
+const arrowBounceUp = keyframes`
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+`;
+
+const ScrollIndicator = styled.div<{ $visible: boolean; $top: boolean }>`
+  position: fixed;
+  ${props => props.$top ? 'top: 2rem;' : 'bottom: 2rem;'}
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: ${props => props.$visible ? 1 : 0};
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+`;
+
+const ScrollLabel = styled.span`
+  font-family: var(--font-orbitron), sans-serif;
+  font-size: 0.55rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #ff4500;
+  text-shadow: 0 0 8px #ff4500;
+  display: block;
+`;
+
+const ScrollTrack = styled.div`
+  width: 140px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 69, 0, 0.2);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+`;
+
+const ScrollFill = styled.div<{ $progress: number }>`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: ${props => Math.round(props.$progress * 100)}%;
+  background: #ff4500;
+  box-shadow: 0 0 6px #ff4500, 0 0 14px #ff450066;
+  transition: width 0.08s linear;
+  border-radius: 2px;
+`;
+
+const ScrollArrow = styled.div<{ $up: boolean }>`
+  color: #ff4500;
+  text-shadow: 0 0 8px #ff4500;
+  font-size: 0.9rem;
+  line-height: 1;
+  animation: ${props => props.$up ? arrowBounceUp : arrowBounceDown} 1s ease-in-out infinite;
 `;
 
 const SectionWrapper = styled.div<{ $offset: number }>`
@@ -60,7 +125,7 @@ const SectionWrapper = styled.div<{ $offset: number }>`
 
   /* Target internal sections for specific home behavior */
   section {
-    padding: 80px 10% 0 10%;
+    padding: 80px 10% 4rem 10%;
     box-sizing: border-box;
     min-height: 100vh;
     width: 100%;
@@ -91,15 +156,26 @@ const SectionWrapper = styled.div<{ $offset: number }>`
 
 export default function Home() {
   const SECTION_COUNT = 4;
-  const { activeSection, setActiveSection, containerRef, sectionRefs } = usePageScroll(SECTION_COUNT);
+  const { activeSection, setActiveSection, scrollProgress, scrollDirection, containerRef, sectionRefs } = usePageScroll(SECTION_COUNT);
 
   const setRef0 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[0] = el }, [sectionRefs])
   const setRef1 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[1] = el }, [sectionRefs])
   const setRef2 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[2] = el }, [sectionRefs])
   const setRef3 = useCallback((el: HTMLDivElement | null) => { sectionRefs.current[3] = el }, [sectionRefs])
 
+  const isGoingUp = scrollDirection === -1;
+  const showIndicator = scrollProgress > 0.03;
+
   return (
     <MainWrapper ref={containerRef}>
+      <ScrollIndicator $visible={showIndicator} $top={isGoingUp} aria-hidden="true">
+        {isGoingUp && <ScrollArrow $up={true}>↑</ScrollArrow>}
+        <ScrollLabel>{isGoingUp ? 'seção anterior' : 'próxima seção'}</ScrollLabel>
+        <ScrollTrack>
+          <ScrollFill $progress={scrollProgress} />
+        </ScrollTrack>
+        {!isGoingUp && <ScrollArrow $up={false}>↓</ScrollArrow>}
+      </ScrollIndicator>
       <Sidebar activeIndex={activeSection} onNavigate={setActiveSection} />
 
       <SectionWrapper $offset={0 - activeSection} ref={setRef0}>
