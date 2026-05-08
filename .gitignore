@@ -41,3 +41,12 @@ yarn-error.log*
 next-env.d.ts
 
 /portifolio/*
+
+# claude
+.claude/images/
+.claude/**/*.png
+.claude/**/*.jpg
+.claude/**/*.jpeg
+.claude/**/*.gif
+.claude/**/*.webp
+.claude/**/*.svg
