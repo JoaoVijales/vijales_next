@@ -46,6 +46,7 @@ const HeroInner = styled.div`
 const SectionBlock = styled.div`
   min-height: 100vh;
   position: relative;
+  background: #000;
 `;
 
 export default function Home() {
