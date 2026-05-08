@@ -43,6 +43,12 @@ const HeroInner = styled.div`
   }
 `;
 
+const GradientBridge = styled.div`
+  height: 160px;
+  background: linear-gradient(to bottom, transparent, #000);
+  pointer-events: none;
+`;
+
 const SectionBlock = styled.div`
   min-height: 100vh;
   position: relative;
@@ -94,6 +100,8 @@ export default function Home() {
           <HeroSection isActive={activeSection === 0} />
         </HeroInner>
       </HeroContainer>
+
+      <GradientBridge />
 
       <SectionBlock ref={setRef1}>
         <ServicesSection isActive={activeSection === 1} />
