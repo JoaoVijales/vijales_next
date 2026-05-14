@@ -244,6 +244,24 @@ export default function PortfolioSection({ isActive = false }: PortfolioSectionP
           image="/portifolio/imobiliaria.png"
           link="/portifolio/imobiliaria"
         />
+        <PortfolioItem
+          title="Clínica AURA"
+          description="Landing page para clínica de estética premium — design editorial, luxo e sofisticação"
+          image="https://storage.googleapis.com/uxpilot-auth.appspot.com/d4be4a9ab6-7978702809258893a9e9.png"
+          link="/portifolio/estetica/site"
+        />
+        <PortfolioItem
+          title="OdontoPremium"
+          description="Site institucional para clínica odontológica — autoridade, tratamentos e agendamento online"
+          image="https://storage.googleapis.com/uxpilot-auth.appspot.com/90951fe011-330cd80caa34c07c9908.png"
+          link="/portifolio/odonto/site"
+        />
+        <PortfolioItem
+          title="Maison Éclat"
+          description="Site para salão de beleza de luxo — serviços exclusivos, experiência sensorial e agendamento"
+          image="https://storage.googleapis.com/uxpilot-auth.appspot.com/480ee7895b-7f80c1b41f88850f56c4.png"
+          link="/portifolio/cabelereiro/site"
+        />
       </Grid>
     </PortfolioWrapper>
   )
