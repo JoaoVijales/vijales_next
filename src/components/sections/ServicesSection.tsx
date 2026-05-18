@@ -13,28 +13,40 @@ const flipIn = keyframes`
     opacity: 1;
     transform: perspective(1000px) rotateX(0deg) translateY(0);
   }
-`;
+`
+
+const expandLine = keyframes`
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+`
 
 const ServicesWrapper = styled.section`
-  padding: 4rem 10%;
+  padding: 4rem 8%;
   display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  justify-content: center;
+  grid-template-columns: 1fr;
   align-content: center;
-  gap: 2rem;
+  gap: 1.25rem;
   min-height: 100vh;
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  
-  /* Improve visibility against moving background */
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(5px);
   border-radius: 20px;
 
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 4rem 8%;
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    padding: 4rem 10%;
+  }
+
   @media (max-width: 768px) {
     padding: 2rem 5%;
-    gap: 1rem;
     overflow-y: auto;
   }
 
@@ -42,215 +54,421 @@ const ServicesWrapper = styled.section`
     padding-top: 2rem;
     padding-bottom: 2rem;
   }
-`;
+`
 
 const SectionHeader = styled.div`
   grid-column: 1 / -1;
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
 
   @media (max-width: 768px) {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
   }
-  
+
   h2 {
     font-size: 2rem;
     font-weight: 700;
     color: #fff;
     text-transform: uppercase;
     letter-spacing: 15px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     text-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+    font-family: var(--font-orbitron), sans-serif;
 
     @media (max-width: 768px) {
       font-size: 1.5rem;
       letter-spacing: 8px;
     }
   }
-`;
+`
+
+const HeaderSubtitle = styled.p`
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: block;
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    font-weight: 300;
+    margin-bottom: 1.25rem;
+    font-family: var(--font-orbitron), sans-serif;
+  }
+`
+
+const HeaderDivider = styled.div<{ $isVisible: boolean }>`
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: block;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255, 69, 0, 0.4), rgba(0, 200, 255, 0.3), transparent);
+    transform-origin: left;
+    transform: scaleX(0);
+    max-width: 280px;
+    margin: 0 auto;
+
+    ${p => p.$isVisible && css`
+      animation: ${expandLine} 1.2s ease-out 0.3s forwards;
+    `}
+  }
+`
 
 const Card = styled.div<{ $isVisible?: boolean }>`
-  background: linear-gradient(135deg, rgba(20, 20, 20, 0.9), rgba(10, 10, 10, 0.9));
-  border: 2px solid #0c0c0c66;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 25px), calc(100% - 25px) 100%, 0 100%);
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.9rem;
+  transition: background 0.35s ease, transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
 
-  @media (max-width: 768px) {
-    padding: 1rem;
-    gap: 0.5rem;
-  }
-  
-  /* Initial state for animation */
-  opacity: 0; 
+  opacity: 0;
   transform: perspective(1000px) rotateX(-90deg);
 
   ${props => props.$isVisible && css`
     animation: ${flipIn} 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   `}
-  
+
+  /* Gradient top-border on hover */
   &::before {
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 69, 0, 0.3), transparent);
-    transition: left 0.8s;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(to right, #ff4500, #00C8FF);
+    opacity: 0;
+    transition: opacity 0.35s ease;
   }
 
-  &:hover::before {
-    left: 100%;
-  }
-
+  /* Subtle inner glow */
   &::after {
     content: '';
     position: absolute;
-    bottom: 0;
+    top: 0;
+    left: 0;
     right: 0;
-    width: 25px;
-    height: 25px;
-    background: #ff4500;
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
-    box-shadow: 0 0 20px #ff4500;
+    height: 80px;
+    background: linear-gradient(to bottom, rgba(255, 69, 0, 0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    pointer-events: none;
   }
 
   &:hover {
-    transform: perspective(1000px) rotateX(0deg) translateY(-15px) scale(1.02);
-    border-color: #ff4500;
-    box-shadow: 0 20px 60px rgba(255, 69, 0, 0.4);
-    opacity: 1; /* Ensure it stays visible */
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-6px);
+    box-shadow:
+      0 1px 0 0 rgba(255, 69, 0, 0.5),
+      0 20px 40px rgba(0, 0, 0, 0.4),
+      0 0 60px rgba(255, 69, 0, 0.06);
   }
 
-  h3 {
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
-    color: #fff;
-    text-transform: uppercase;
-    letter-spacing: 4px;
-    font-weight: 700;
-    position: relative;
-    display: inline-block;
-
-    @media (max-width: 768px) {
-      font-size: 0.85rem;
-      letter-spacing: 2px;
-    }
-
-    &::after {
-      content: '';
-      position: absolute;
-      bottom: -10px;
-      left: 0;
-      width: 40px;
-      height: 2px;
-      background: #ff4500;
-      box-shadow: 0 0 10px #ff4500;
-    }
+  &:hover::before {
+    opacity: 1;
   }
 
-  p {
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 2;
-    font-size: 0.75rem;
-    font-weight: 300;
-    letter-spacing: 0.5px;
-    margin-top: 1rem;
-
-    @media (max-width: 768px) {
-      margin-top: 0.5rem;
-      line-height: 1.6;
-    }
+  &:hover::after {
+    opacity: 1;
   }
-`;
 
-const IconWrapper = styled.div`
-  width: 4rem;
-  height: 4rem;
-  margin-bottom: 0;
+  @media (min-width: 1024px) {
+    padding: 2rem;
+    gap: 1.1rem;
+  }
 
   @media (max-width: 768px) {
-    width: 3rem;
-    height: 3rem;
+    padding: 1.25rem;
+    gap: 0.7rem;
   }
-  
+`
+
+const IconBox = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  background: rgba(255, 69, 0, 0.07);
+  border: 1px solid rgba(255, 69, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.35s ease, background 0.35s ease;
+  flex-shrink: 0;
+
   svg {
-    width: 100%;
-    height: 100%;
+    width: 28px;
+    height: 28px;
   }
-`;
+
+  @media (max-width: 768px) {
+    width: 40px;
+    height: 40px;
+
+    svg {
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  ${Card}:hover & {
+    border-color: rgba(255, 69, 0, 0.3);
+    background: rgba(255, 69, 0, 0.1);
+  }
+`
+
+const CardTitle = styled.h3`
+  font-size: 0.82rem;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  font-weight: 700;
+  font-family: var(--font-orbitron), sans-serif;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 0.72rem;
+    letter-spacing: 2.5px;
+  }
+`
+
+const CardDescription = styled.p`
+  color: rgba(255, 255, 255, 0.42);
+  line-height: 1.85;
+  font-size: 0.7rem;
+  font-weight: 300;
+  letter-spacing: 0.2px;
+  margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 0.65rem;
+    line-height: 1.65;
+  }
+`
+
+const Deliverables = styled.ul`
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding: 0;
+    list-style: none;
+    margin: 0;
+    padding-top: 0.25rem;
+
+    li {
+      font-size: 0.56rem;
+      color: rgba(255, 255, 255, 0.28);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      font-family: var(--font-orbitron), sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      transition: color 0.25s;
+
+      &::before {
+        content: '';
+        display: inline-block;
+        width: 3px;
+        height: 3px;
+        background: rgba(255, 69, 0, 0.45);
+        flex-shrink: 0;
+        border-radius: 1px;
+        transition: background 0.25s;
+      }
+    }
+  }
+
+  ${Card}:hover & li {
+    color: rgba(255, 255, 255, 0.42);
+
+    &::before {
+      background: rgba(255, 69, 0, 0.85);
+    }
+  }
+`
+
+const CardFooter = styled.div`
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+`
+
+const Tag = styled.span`
+  font-size: 0.48rem;
+  color: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  padding: 0.15rem 0.5rem;
+  font-family: var(--font-orbitron), sans-serif;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  transition: color 0.25s, border-color 0.25s;
+
+  ${Card}:hover & {
+    color: rgba(255, 69, 0, 0.45);
+    border-color: rgba(255, 69, 0, 0.12);
+  }
+`
+
+const BottomRow = styled.div<{ $isVisible: boolean }>`
+  display: none;
+
+  @media (min-width: 1024px) {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    opacity: 0;
+
+    ${p => p.$isVisible && css`
+      animation: ${flipIn} 1s ease-out 1.6s forwards;
+    `}
+  }
+`
+
+const TechStack = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+
+  .label {
+    font-size: 0.48rem;
+    color: rgba(255, 255, 255, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    margin-right: 0.4rem;
+    font-family: var(--font-orbitron), sans-serif;
+  }
+`
+
+const TechBadge = styled.span`
+  font-size: 0.52rem;
+  color: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+  padding: 0.2rem 0.6rem;
+  font-family: var(--font-orbitron), sans-serif;
+  letter-spacing: 0.8px;
+  transition: color 0.2s, border-color 0.2s;
+
+  &:hover {
+    color: rgba(255, 69, 0, 0.7);
+    border-color: rgba(255, 69, 0, 0.18);
+  }
+`
+
+const CtaLink = styled.a`
+  font-size: 0.56rem;
+  color: rgba(255, 255, 255, 0.13);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  font-family: var(--font-orbitron), sans-serif;
+  transition: color 0.25s;
+
+  &:hover {
+    color: rgba(255, 69, 0, 0.75);
+  }
+`
 
 interface FeatureProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  isVisible: boolean;
-  index: number;
+  icon: React.ReactNode
+  title: string
+  description: string
+  isVisible: boolean
+  index: number
+  tags?: string[]
+  deliverables?: string[]
 }
 
-function FeatureCard({ icon, title, description, isVisible, index }: FeatureProps) {
+function FeatureCard({ icon, title, description, isVisible, index, tags, deliverables }: FeatureProps) {
   const svgRef = useRef<SVGSVGElement>(null)
-
-  // Apply SVG animation hook to the cloned icon if it's an SVG
   useSVGAnimate(svgRef, isVisible)
 
   return (
-    <Card className="feature-card" $isVisible={isVisible} style={{ animationDelay: `${index * 0.4}s` }}>
-      <IconWrapper>
+    <Card className="feature-card" $isVisible={isVisible} style={{ animationDelay: `${index * 0.25}s` }}>
+      <IconBox>
         {React.cloneElement(icon as React.ReactElement, { ref: svgRef } as any)}
-      </IconWrapper>
-      <h3>{title}</h3>
-      <p>{description}</p>
+      </IconBox>
+      <CardTitle>{title}</CardTitle>
+      <CardDescription>{description}</CardDescription>
+      {deliverables && (
+        <Deliverables>
+          {deliverables.map(d => <li key={d}>{d}</li>)}
+        </Deliverables>
+      )}
+      {tags && (
+        <CardFooter>
+          {tags.map(tag => <Tag key={tag}>{tag}</Tag>)}
+        </CardFooter>
+      )}
     </Card>
   )
 }
 
 interface ServicesSectionProps {
-  isActive?: boolean;
+  isActive?: boolean
 }
 
 export default function ServicesSection({ isActive = false }: ServicesSectionProps) {
-  // const [ref, isVisible] = useIntersectionObserver(...) -> Replaced
-
   return (
     <ServicesWrapper id="services" className={isActive ? 'active' : ''}>
       <SectionHeader>
         <h2>SERVIÇOS</h2>
+        <HeaderSubtitle>O que construímos e entregamos</HeaderSubtitle>
+        <HeaderDivider $isVisible={isActive} />
       </SectionHeader>
 
       <FeatureCard
         isVisible={isActive}
         index={0}
-        title="Soluções Personalizadas"
-        description="Desenvolvimento sob medida com código limpo e otimizado, criando aplicações que atendem exatamente às necessidades do seu negócio com performance excepcional."
+        title="Produto SaaS"
+        description="Da ideia ao produto em produção. Construímos plataformas completas com autenticação, planos de assinatura, painel admin e isolamento multi-tenant."
+        deliverables={[
+          'Auth com múltiplos provedores',
+          'Planos pagos com Stripe / AbacatePay',
+          'Dashboard admin com métricas',
+          'Multi-tenant com isolamento de dados',
+        ]}
+        tags={['Next.js', 'Supabase', 'Stripe', 'Firebase']}
         icon={
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M40 10 L40 25" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" />
-            <path d="M40 55 L40 70" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" />
-            <path d="M10 40 L25 40" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" />
-            <path d="M55 40 L70 40" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" />
-            <path d="M40 25 L50 30 L50 40 L40 45 L30 40 L30 30 Z" stroke="#FF4500" strokeWidth="2" fill="none" />
-            <circle cx="40" cy="10" r="3" fill="#FF4500" />
-            <circle cx="40" cy="70" r="3" fill="#FF4500" />
-            <circle cx="10" cy="40" r="3" fill="#FF4500" />
-            <circle cx="70" cy="40" r="3" fill="#FF4500" />
-            <path d="M25 15 L30 20" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M55 15 L50 20" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M25 65 L30 60" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
-            <path d="M55 65 L50 60" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
-            <circle cx="25" cy="15" r="2" fill="none" stroke="#FF4500" strokeWidth="1.5" />
-            <circle cx="55" cy="15" r="2" fill="none" stroke="#FF4500" strokeWidth="1.5" />
-            <circle cx="25" cy="65" r="2" fill="none" stroke="#FF4500" strokeWidth="1.5" />
-            <circle cx="55" cy="65" r="2" fill="none" stroke="#FF4500" strokeWidth="1.5" />
-            <circle cx="40" cy="35" r="2" fill="#FF4500" opacity="0.8">
+            <rect x="12" y="48" width="56" height="14" rx="2" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <rect x="12" y="33" width="56" height="14" rx="2" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <rect x="12" y="18" width="56" height="14" rx="2" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <circle cx="22" cy="25" r="2.5" fill="#FF4500" opacity="0.8">
               <animate attributeName="opacity" values="0.8;1;0.8" dur="2s" repeatCount="indefinite" />
             </circle>
+            <circle cx="22" cy="40" r="2.5" fill="#FF4500" opacity="0.5" />
+            <circle cx="22" cy="55" r="2.5" fill="#FF4500" opacity="0.3" />
+            <line x1="30" y1="25" x2="52" y2="25" stroke="#FF4500" strokeWidth="1" strokeLinecap="round" opacity="0.4" />
+            <line x1="30" y1="40" x2="46" y2="40" stroke="#FF4500" strokeWidth="1" strokeLinecap="round" opacity="0.25" />
+            <line x1="30" y1="55" x2="42" y2="55" stroke="#FF4500" strokeWidth="1" strokeLinecap="round" opacity="0.15" />
+            <path d="M 60 18 L 60 12 L 72 12 L 72 22 L 66 22" stroke="#FF4500" strokeWidth="1.5" fill="none" strokeLinecap="round" opacity="0.6">
+              <animate attributeName="stroke-dashoffset" values="0;-30" dur="2s" repeatCount="indefinite" />
+            </path>
           </svg>
         }
       />
@@ -258,30 +476,37 @@ export default function ServicesSection({ isActive = false }: ServicesSectionPro
       <FeatureCard
         isVisible={isActive}
         index={1}
-        title="Design Responsivo e Moderno"
-        description="Interfaces elegantes que funcionam perfeitamente em qualquer dispositivo, proporcionando uma experiência fluida e profissional para seus usuários."
+        title="Automação & IA"
+        description="Sistemas que trabalham enquanto você dorme. Bots para WhatsApp, pipelines de IA para análise automatizada e integrações com webhooks em tempo real."
+        deliverables={[
+          'Bots WhatsApp via Twilio',
+          'Pipelines com OpenAI / LLMs',
+          'Webhooks e filas de processamento',
+          'Painel de controle das automações',
+        ]}
+        tags={['OpenAI', 'Twilio', 'Django', 'Celery']}
         icon={
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="15" y="20" width="50" height="32" rx="2" stroke="#FF4500" strokeWidth="2" fill="none" />
-            <line x1="20" y1="25" x2="35" y2="25" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="20" y1="30" x2="45" y2="30" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
-            <line x1="20" y1="35" x2="40" y2="35" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
-            <rect x="15" y="20" width="50" height="32" rx="2" stroke="#FF4500" strokeWidth="1" fill="none" opacity="0.3" />
-            <rect x="14" y="19" width="52" height="34" rx="2" stroke="#FF4500" strokeWidth="0.5" fill="none" opacity="0.2" />
-            <line x1="38" y1="52" x2="42" y2="52" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" />
-            <line x1="30" y1="56" x2="50" y2="56" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" />
-            <rect x="52" y="42" width="18" height="28" rx="2" stroke="#FF4500" strokeWidth="2" fill="none" />
-            <line x1="55" y1="46" x2="60" y2="46" stroke="#FF4500" strokeWidth="1" strokeLinecap="round" />
-            <line x1="55" y1="49" x2="65" y2="49" stroke="#FF4500" strokeWidth="1" strokeLinecap="round" />
-            <line x1="55" y1="52" x2="63" y2="52" stroke="#FF4500" strokeWidth="1" strokeLinecap="round" />
-            <path d="M 45 35 Q 50 37 52 42" stroke="#FF4500" strokeWidth="1.5" fill="none" strokeDasharray="2 2" opacity="0.6">
-              <animate attributeName="stroke-dashoffset" values="0;-10" dur="1.5s" repeatCount="indefinite" />
-            </path>
-            <circle cx="55" cy="30" r="1.5" fill="#FF4500" opacity="0.8">
-              <animate attributeName="opacity" values="0.4;1;0.4" dur="1.5s" repeatCount="indefinite" />
-            </circle>
-            <circle cx="50" cy="25" r="1.5" fill="#FF4500" opacity="0.8">
-              <animate attributeName="opacity" values="1;0.4;1" dur="1.5s" repeatCount="indefinite" />
+            <circle cx="40" cy="40" r="10" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <circle cx="40" cy="14" r="4" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <circle cx="40" cy="66" r="4" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <circle cx="14" cy="40" r="4" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <circle cx="66" cy="40" r="4" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <circle cx="21" cy="21" r="3" stroke="#FF4500" strokeWidth="1.5" fill="none" opacity="0.6" />
+            <circle cx="59" cy="21" r="3" stroke="#FF4500" strokeWidth="1.5" fill="none" opacity="0.6" />
+            <circle cx="21" cy="59" r="3" stroke="#FF4500" strokeWidth="1.5" fill="none" opacity="0.6" />
+            <circle cx="59" cy="59" r="3" stroke="#FF4500" strokeWidth="1.5" fill="none" opacity="0.6" />
+            <line x1="40" y1="30" x2="40" y2="18" stroke="#FF4500" strokeWidth="1" opacity="0.5" />
+            <line x1="40" y1="50" x2="40" y2="62" stroke="#FF4500" strokeWidth="1" opacity="0.5" />
+            <line x1="30" y1="40" x2="18" y2="40" stroke="#FF4500" strokeWidth="1" opacity="0.5" />
+            <line x1="50" y1="40" x2="62" y2="40" stroke="#FF4500" strokeWidth="1" opacity="0.5" />
+            <line x1="33" y1="33" x2="24" y2="24" stroke="#FF4500" strokeWidth="1" opacity="0.35" />
+            <line x1="47" y1="33" x2="56" y2="24" stroke="#FF4500" strokeWidth="1" opacity="0.35" />
+            <line x1="33" y1="47" x2="24" y2="56" stroke="#FF4500" strokeWidth="1" opacity="0.35" />
+            <line x1="47" y1="47" x2="56" y2="56" stroke="#FF4500" strokeWidth="1" opacity="0.35" />
+            <circle cx="40" cy="40" r="3" fill="#FF4500">
+              <animate attributeName="r" values="3;4.5;3" dur="1.8s" repeatCount="indefinite" />
+              <animate attributeName="opacity" values="1;0.6;1" dur="1.8s" repeatCount="indefinite" />
             </circle>
           </svg>
         }
@@ -290,40 +515,80 @@ export default function ServicesSection({ isActive = false }: ServicesSectionPro
       <FeatureCard
         isVisible={isActive}
         index={2}
-        title="Suporte Completo"
-        description="Integração de sistemas, manutenção contínua e arquitetura escalável para garantir que seu projeto cresça junto com seu negócio sem preocupações."
+        title="Experiência Web"
+        description="Sites que causam impacto. Landing pages com ambientes 3D, animações avançadas e interações que convertem. Do portfólio imersivo à vitrine institucional."
+        deliverables={[
+          'Cenas 3D interativas com Three.js',
+          'Animações SVG e CSS avançadas',
+          'Performance e Core Web Vitals',
+          'Design responsivo pixel-perfect',
+        ]}
+        tags={['Three.js', 'Next.js', 'GSAP', 'WebGL']}
         icon={
           <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="40" cy="40" r="18" stroke="#FF4500" strokeWidth="2" fill="none" />
-            <rect x="38" y="17" width="4" height="6" fill="#FF4500" />
-            <rect x="38" y="57" width="4" height="6" fill="#FF4500" />
-            <rect x="17" y="38" width="6" height="4" fill="#FF4500" />
-            <rect x="57" y="38" width="6" height="4" fill="#FF4500" />
-            <rect x="52" y="23" width="4" height="6" fill="#FF4500" transform="rotate(45 54 26)" />
-            <rect x="24" y="23" width="4" height="6" fill="#FF4500" transform="rotate(-45 26 26)" />
-            <rect x="52" y="51" width="4" height="6" fill="#FF4500" transform="rotate(-45 54 54)" />
-            <rect x="24" y="51" width="4" height="6" fill="#FF4500" transform="rotate(45 26 54)" />
-            <circle cx="40" cy="40" r="8" stroke="#FF4500" strokeWidth="2" fill="none" />
-            <circle cx="40" cy="40" r="3" fill="#FF4500">
-              <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" />
-              <animate attributeName="opacity" values="1;0.7;1" dur="2s" repeatCount="indefinite" />
+            <ellipse cx="40" cy="40" rx="22" ry="22" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <ellipse cx="40" cy="40" rx="22" ry="10" stroke="#FF4500" strokeWidth="1" fill="none" opacity="0.5" />
+            <ellipse cx="40" cy="40" rx="10" ry="22" stroke="#FF4500" strokeWidth="1" fill="none" opacity="0.5" />
+            <line x1="18" y1="40" x2="62" y2="40" stroke="#FF4500" strokeWidth="1" opacity="0.3" />
+            <line x1="40" y1="18" x2="40" y2="62" stroke="#FF4500" strokeWidth="1" opacity="0.3" />
+            <circle cx="40" cy="40" r="3" fill="#FF4500" opacity="0.9">
+              <animate attributeName="opacity" values="0.9;0.4;0.9" dur="2.5s" repeatCount="indefinite" />
             </circle>
-            <g opacity="0.7">
-              <path d="M 65 15 L 70 10 L 72 12 L 67 17" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-              <circle cx="65" cy="15" r="3" stroke="#FF4500" strokeWidth="1.5" fill="none" />
-              <path d="M 12 68 L 8 72" stroke="#FF4500" strokeWidth="2" strokeLinecap="round" />
-              <rect x="8" y="64" width="8" height="3" fill="#FF4500" transform="rotate(-45 12 65.5)" />
-            </g>
-            <path d="M 30 12 L 28 10 L 26 12" stroke="#FF4500" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-            <circle cx="28" cy="10" r="1.5" fill="#FF4500" />
-            <path d="M 68 50 L 70 48 L 72 50" stroke="#FF4500" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-            <circle cx="70" cy="48" r="1.5" fill="#FF4500" />
-            <path d="M 15 65 Q 25 50 35 45" stroke="#FF4500" strokeWidth="1" fill="none" strokeDasharray="2 2" opacity="0.5">
-              <animate attributeName="stroke-dashoffset" values="0;-8" dur="1s" repeatCount="indefinite" />
-            </path>
+            <circle cx="57" cy="27" r="2" fill="#FF4500" opacity="0.6" />
+            <circle cx="23" cy="53" r="2" fill="#FF4500" opacity="0.4" />
+            <path d="M 57 27 L 62 20 L 68 22" stroke="#FF4500" strokeWidth="1" fill="none" strokeLinecap="round" opacity="0.5" />
+            <circle cx="65" cy="19" r="1.5" fill="#FF4500" opacity="0.8">
+              <animate attributeName="opacity" values="0.8;0.2;0.8" dur="1.5s" repeatCount="indefinite" />
+            </circle>
           </svg>
         }
       />
+
+      <FeatureCard
+        isVisible={isActive}
+        index={3}
+        title="API & Integrações"
+        description="Backend robusto para qualquer escala. APIs REST documentadas, integrações com serviços externos e infraestrutura containerizada pronta para produção."
+        deliverables={[
+          'APIs REST com documentação',
+          'Integrações com sistemas externos',
+          'Deploy com Docker e Nginx',
+          'Testes automatizados e CI/CD',
+        ]}
+        tags={['Django REST', 'Node.js', 'PostgreSQL', 'Docker']}
+        icon={
+          <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="28" width="20" height="24" rx="2" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <rect x="50" y="28" width="20" height="24" rx="2" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <rect x="30" y="35" width="20" height="10" rx="2" stroke="#FF4500" strokeWidth="1.5" fill="none" />
+            <line x1="30" y1="40" x2="18" y2="40" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="50" y1="40" x2="62" y2="40" stroke="#FF4500" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="15" cy="35" r="1.5" fill="#FF4500" opacity="0.7" />
+            <circle cx="15" cy="40" r="1.5" fill="#FF4500" opacity="0.4" />
+            <circle cx="15" cy="45" r="1.5" fill="#FF4500" opacity="0.2" />
+            <circle cx="65" cy="35" r="1.5" fill="#FF4500" opacity="0.7" />
+            <circle cx="65" cy="40" r="1.5" fill="#FF4500" opacity="0.4" />
+            <circle cx="65" cy="45" r="1.5" fill="#FF4500" opacity="0.2" />
+            <path d="M 36 40 L 40 36 L 44 40 L 40 44 Z" stroke="#FF4500" strokeWidth="1" fill="none">
+              <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite" />
+            </path>
+            <line x1="40" y1="28" x2="40" y2="20" stroke="#FF4500" strokeWidth="1" strokeLinecap="round" opacity="0.4" strokeDasharray="2 2" />
+            <line x1="40" y1="52" x2="40" y2="60" stroke="#FF4500" strokeWidth="1" strokeLinecap="round" opacity="0.4" strokeDasharray="2 2" />
+          </svg>
+        }
+      />
+
+      <BottomRow $isVisible={isActive}>
+        <TechStack>
+          <span className="label">Stack</span>
+          {['Next.js', 'React', 'TypeScript', 'Django', 'PostgreSQL', 'Supabase', 'Three.js', 'Docker'].map(tech => (
+            <TechBadge key={tech}>{tech}</TechBadge>
+          ))}
+        </TechStack>
+        <CtaLink href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '5548988699159'}`}>
+          Não sabe qual serviço precisa? Conta o projeto →
+        </CtaLink>
+      </BottomRow>
     </ServicesWrapper>
   )
 }
