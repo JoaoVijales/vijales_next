@@ -12,9 +12,9 @@ const SidebarWrapper = styled.aside`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
+  gap: 2rem;
   z-index: 100;
-  padding: 1.25rem 0.6rem;
+  padding: 2rem 0.75rem;
   background: rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -33,7 +33,7 @@ const SidebarWrapper = styled.aside`
 const SocialLinks = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.4rem;
 `
 
 const SocialIcon = styled.a`
@@ -52,7 +52,7 @@ const SocialIcon = styled.a`
 
 const Divider = styled.div`
   width: 1px;
-  height: 28px;
+  height: 36px;
   background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.07), transparent);
 `
 
@@ -60,7 +60,7 @@ const NavIndicator = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.1rem;
+  gap: 1.6rem;
   position: relative;
 `
 
@@ -76,11 +76,11 @@ const NavDot = styled.button<{ $active: boolean }>`
   position: relative;
 
   ${p => p.$active ? css`
-    height: 22px;
+    height: 28px;
   ` : css`
-    height: 6px;
+    height: 8px;
     &:hover {
-      height: 10px;
+      height: 14px;
       background: rgba(255, 255, 255, 0.35);
     }
   `}
