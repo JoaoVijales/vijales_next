@@ -1,115 +1,112 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import styled from 'styled-components'
+import React from 'react'
+import styled, { css } from 'styled-components'
 import { Github, Linkedin } from 'lucide-react'
 
 const SidebarWrapper = styled.aside`
   position: fixed;
-  right: 2rem;
+  right: 1.75rem;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3rem;
+  gap: 2rem;
   z-index: 100;
-  padding: 2rem 0.5rem;
-  background: rgba(10, 10, 10, 0.4);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 69, 0, 0.2);
-  border-radius: 50px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-  transition: all 0.5s ease;
+  padding: 2rem 0.75rem;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 40px;
+  transition: border-color 0.3s ease;
 
-  @media (max-width: 768px) {
-    display: none;
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.08);
   }
 
   @media (max-width: 1024px) {
-    gap: 1.5rem;
-    padding: 1rem 0.5rem;
-    right: 1rem;
-  }
-`
-
-const NavIndicator = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-`
-
-const NavDot = styled.button<{ $active: boolean }>`
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: ${props => props.$active ? '#ff4500' : 'rgba(255, 255, 255, 0.2)'};
-  box-shadow: ${props => props.$active ? '0 0 10px #ff4500, 0 0 20px #ff4500' : 'none'};
-  transition: all 0.3s ease;
-  cursor: pointer;
-  position: relative;
-  border: none;
-  padding: 0;
-
-  &::after {
-    content: attr(data-label);
-    position: absolute;
-    right: 2.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #fff;
-    font-size: 0.7rem;
-    font-family: var(--font-orbitron), sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-    text-align: right;
-  }
-
-  &:hover::after {
-    opacity: 1;
-    right: 2rem;
+    display: none;
   }
 `
 
 const SocialLinks = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-
-  @media (max-width: 1024px) {
-    display: none;
-  }
+  gap: 1.4rem;
 `
 
 const SocialIcon = styled.a`
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-decoration: none;
-  transition: all 0.3s ease;
-  font-weight: bold;
-  font-family: var(--font-orbitron), sans-serif;
+  transition: color 0.25s ease, transform 0.25s ease;
 
   &:hover {
-    color: #ff4500;
-    text-shadow: 0 0 10px #ff4500;
-    transform: scale(1.2);
+    color: rgba(255, 69, 0, 0.8);
+    transform: scale(1.15);
   }
 `
 
-const Line = styled.div`
+const Divider = styled.div`
   width: 1px;
-  height: 40px;
-  background: linear-gradient(to bottom, transparent, rgba(255, 69, 0, 0.5), transparent);
-
-  @media (max-width: 1024px) {
-    display: none;
-  }
+  height: 36px;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.07), transparent);
 `
 
+const NavIndicator = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  position: relative;
+`
+
+const NavDot = styled.button<{ $active: boolean }>`
+  width: 2px;
+  border-radius: 2px;
+  background: ${p => p.$active ? '#ff4500' : 'rgba(255, 255, 255, 0.15)'};
+  box-shadow: ${p => p.$active ? '0 0 8px #ff4500, 0 0 16px rgba(255,69,0,0.4)' : 'none'};
+  transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  position: relative;
+
+  ${p => p.$active ? css`
+    height: 28px;
+  ` : css`
+    height: 8px;
+    &:hover {
+      height: 14px;
+      background: rgba(255, 255, 255, 0.35);
+    }
+  `}
+
+  &::after {
+    content: attr(data-label);
+    position: absolute;
+    right: calc(100% + 1rem);
+    top: 50%;
+    transform: translateY(-50%);
+    color: ${p => p.$active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)'};
+    font-size: 0.52rem;
+    font-family: var(--font-orbitron), sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, right 0.2s ease;
+    white-space: nowrap;
+  }
+
+  &:hover::after {
+    opacity: 1;
+    right: calc(100% + 0.75rem);
+  }
+`
 
 const sections = [
   { id: 'home', label: 'Home' },
@@ -119,25 +116,23 @@ const sections = [
 ]
 
 interface SidebarProps {
-  activeIndex: number;
-  onNavigate: (index: number) => void;
+  activeIndex: number
+  onNavigate: (index: number) => void
 }
 
 export default function Sidebar({ activeIndex, onNavigate }: SidebarProps) {
-  // Internal state/observer removed in favor of props control
-
   return (
     <SidebarWrapper>
       <SocialLinks>
         <SocialIcon href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-          <Github size={20} />
+          <Github size={16} />
         </SocialIcon>
         <SocialIcon href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-          <Linkedin size={20} />
+          <Linkedin size={16} />
         </SocialIcon>
       </SocialLinks>
 
-      <Line />
+      <Divider />
 
       <NavIndicator>
         {sections.map((section, index) => (
