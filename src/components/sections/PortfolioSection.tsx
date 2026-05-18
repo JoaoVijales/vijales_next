@@ -5,43 +5,37 @@ import styled from 'styled-components'
 import { useSVGAnimate } from '@/hooks/useSVGAnimate'
 
 const PortfolioWrapper = styled.section`
-  padding-top: 4rem;
-  padding-bottom: 4rem;
-  padding-right: 5%;
-  padding-left: 5%;
+  padding: 4rem 5%;
   max-width: 1600px;
   margin: 0 auto;
+  overflow-y: auto;
 
   @media (max-width: 768px) {
-    padding-top: 2rem;
-    padding-bottom: 2rem;
+    padding: 2rem 5%;
   }
-`;
+`
 
 const SectionHeader = styled.div`
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 
   @media (max-width: 768px) {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .v-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 2rem;
-    filter: drop-shadow(0 0 20px rgba(255, 69, 0, 0.8));
-    
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.5rem;
+    filter: drop-shadow(0 0 16px rgba(255, 69, 0, 0.7));
+
     @media (max-width: 768px) {
-      width: 60px;
-      height: 60px;
+      width: 48px;
+      height: 48px;
       margin-bottom: 1rem;
     }
 
-    svg {
-      width: 100%;
-      height: 100%;
-    }
+    svg { width: 100%; height: 100%; }
   }
 
   h2 {
@@ -50,8 +44,9 @@ const SectionHeader = styled.div`
     color: #fff;
     text-transform: uppercase;
     letter-spacing: 15px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     text-shadow: 0 0 20px rgba(255, 69, 0, 0.5);
+    font-family: var(--font-orbitron), sans-serif;
 
     @media (max-width: 768px) {
       font-size: 1.5rem;
@@ -60,116 +55,163 @@ const SectionHeader = styled.div`
   }
 
   p {
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
-    letter-spacing: 2px;
+    font-size: 0.65rem;
+    color: rgba(255, 255, 255, 0.2);
+    letter-spacing: 5px;
     font-weight: 300;
+    text-transform: uppercase;
+    font-family: var(--font-orbitron), sans-serif;
   }
-`;
+`
 
 const Grid = styled.div`
-  padding-inline: 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
 
   @media (max-width: 1024px) {
-    padding-inline: 0;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
   }
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
-`;
+`
 
 const ItemCard = styled.a`
-  background: linear-gradient(135deg, rgba(20, 20, 20, 0.95), rgba(10, 10, 10, 0.95));
-  border: 2px solid rgba(255, 69, 0, 0.3);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
   overflow: hidden;
   position: relative;
-  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease, background 0.35s ease;
   text-decoration: none;
+  display: flex;
+  flex-direction: column;
 
-  &::after {
+  &::before {
     content: '';
     position: absolute;
-    bottom: 0;
+    top: 0;
+    left: 0;
     right: 0;
-    width: 30px;
-    height: 30px;
-    background: #ff4500;
-    clip-path: polygon(100% 0, 100% 100%, 0 100%);
-    box-shadow: 0 0 20px #ff4500;
+    height: 1px;
+    background: linear-gradient(to right, #ff4500, #00C8FF);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 2;
   }
 
   &:hover {
-    transform: translateY(-10px);
-    border-color: #ff4500;
-    box-shadow: 0 20px 50px rgba(255, 69, 0, 0.5);
+    transform: translateY(-8px);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow:
+      0 1px 0 0 rgba(255, 69, 0, 0.4),
+      0 20px 40px rgba(0, 0, 0, 0.5),
+      0 0 60px rgba(255, 69, 0, 0.05);
   }
-`;
+
+  &:hover::before {
+    opacity: 1;
+  }
+`
 
 const ItemImage = styled.div<{ $bg: string }>`
   width: 100%;
-  height: 200px;
-  background: linear-gradient(135deg, #1a1a1a, #0a0a0a);
+  height: 180px;
+  background: linear-gradient(135deg, rgba(20, 20, 20, 0.9), rgba(10, 10, 10, 0.9));
   background-image: url(${props => props.$bg});
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.6));
+    pointer-events: none;
+  }
 
   @media (max-width: 768px) {
-    height: 160px;
+    height: 150px;
   }
-`;
+`
 
 const ItemContent = styled.div`
-  padding: 2rem;
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 
   @media (max-width: 768px) {
-    padding: 1.2rem;
+    padding: 1.1rem;
   }
 
   h3 {
-    font-size: 1rem;
+    font-size: 0.78rem;
     color: #fff;
     text-transform: uppercase;
     letter-spacing: 3px;
-    margin-bottom: 1rem;
     font-weight: 700;
+    font-family: var(--font-orbitron), sans-serif;
+    margin: 0;
 
     @media (max-width: 768px) {
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
+      font-size: 0.7rem;
     }
   }
 
   p {
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.8;
-    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.4);
+    line-height: 1.7;
+    font-size: 0.7rem;
     font-weight: 300;
+    margin: 0;
 
     @media (max-width: 768px) {
-      font-size: 0.85rem;
-      line-height: 1.6;
+      font-size: 0.65rem;
     }
   }
-`;
+`
+
+const ViewLabel = styled.span`
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.52rem;
+    color: rgba(255, 69, 0, 0);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: var(--font-orbitron), sans-serif;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    transition: color 0.25s ease;
+
+    ${ItemCard}:hover & {
+      color: rgba(255, 69, 0, 0.6);
+    }
+
+    &::after {
+      content: '→';
+    }
+  }
+`
 
 interface PortfolioItemProps {
-  title: string;
-  description: string;
-  image: string;
-  link: string;
+  title: string
+  description: string
+  image: string
+  link: string
 }
 
 function PortfolioItem({ title, description, image, link }: PortfolioItemProps) {
@@ -179,19 +221,18 @@ function PortfolioItem({ title, description, image, link }: PortfolioItemProps) 
       <ItemContent>
         <h3>{title}</h3>
         <p>{description}</p>
+        <ViewLabel>Ver projeto</ViewLabel>
       </ItemContent>
     </ItemCard>
   )
 }
 
 interface PortfolioSectionProps {
-  isActive?: boolean;
+  isActive?: boolean
 }
 
 export default function PortfolioSection({ isActive = false }: PortfolioSectionProps) {
-  // const [ref, isVisible] = useIntersectionObserver(...) -> Replaced
   const svgRef = useRef<SVGSVGElement>(null)
-
   useSVGAnimate(svgRef, isActive)
 
   return (

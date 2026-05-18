@@ -26,7 +26,7 @@ const glitchText = keyframes`
 const HeroWrapper = styled.section`
   text-align: center;
   align-items: center;
-`;
+`
 
 const TronLogo = styled.div`
   width: 200px;
@@ -50,19 +50,20 @@ const TronLogo = styled.div`
     width: 100%;
     height: 100%;
   }
-`;
+`
 
 const Tagline = styled.div`
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #00C8FF;
   margin-bottom: 1rem;
   text-transform: uppercase;
-  letter-spacing: 6px;
+  letter-spacing: 8px;
   font-weight: 400;
   opacity: 0;
   animation: fadeInUp 1s ease-out 0.5s forwards;
   display: block;
-`;
+  font-family: var(--font-orbitron), sans-serif;
+`
 
 const Title = styled.h1`
   font-size: clamp(2.5rem, 8vw, 4rem);
@@ -86,16 +87,16 @@ const Title = styled.h1`
     z-index: -1;
     animation: ${glitchText} 5s infinite;
   }
-`;
+`
 
 const Subtitle = styled.p`
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.5);
   margin-bottom: 3rem;
-  max-width: 650px;
-  line-height: 1.8;
+  max-width: 580px;
+  line-height: 1.9;
   font-weight: 300;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   opacity: 0;
   animation: fadeInUp 1s ease-out 1.1s forwards;
 
@@ -107,24 +108,26 @@ const Subtitle = styled.p`
   @media (max-height: 700px) {
     margin-bottom: 1.5rem;
   }
-`;
+`
 
 const CtaButton = styled.a`
-  padding: 1rem 1.5rem;
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 2rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
   letter-spacing: 4px;
   font-weight: 700;
   font-family: var(--font-orbitron), sans-serif;
   background: transparent;
   text-decoration: none;
-  border: 2px solid #00C8FF;
+  border: 1px solid rgba(0, 200, 255, 0.35);
+  border-radius: 2px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: all 0.4s;
-  clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
-  box-shadow: 0 0 20px rgba(255, 69, 0, 0.3);
+  transition: color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
   opacity: 0;
   animation: fadeInUp 1s ease-out 0.9s forwards;
   color: #00C8FF;
@@ -132,45 +135,41 @@ const CtaButton = styled.a`
   span {
     position: relative;
     z-index: 2;
-    transition: color 0.4s;
+    transition: color 0.3s;
   }
 
   &::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: radial-gradient(circle, #00C8FF, transparent);
-    transition: all 0.6s;
-    transform: translate(-50%, -50%);
+    inset: 0;
+    background: #00C8FF;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   &:hover {
     color: #000;
-    background: #00C8FF;
-    box-shadow: 0 0 40px #00C8FFcc, inset 0 0 20px #ffffff33;
-    transform: translateY(-5px);
+    border-color: #00C8FF;
+    box-shadow: 0 0 30px rgba(0, 200, 255, 0.25), 0 8px 24px rgba(0, 0, 0, 0.4);
+    transform: translateY(-4px);
 
     span {
       color: #000;
     }
 
     &::before {
-      width: 300%;
-      height: 300%;
+      transform: scaleX(1);
     }
   }
-`;
+`
 
 interface HeroSectionProps {
-  isActive?: boolean;
+  isActive?: boolean
 }
 
 export default function HeroSection({ isActive = false }: HeroSectionProps) {
   const svgRef = useRef<SVGSVGElement>(null)
-
   useSVGAnimate(svgRef, isActive)
 
   return (
@@ -180,16 +179,13 @@ export default function HeroSection({ isActive = false }: HeroSectionProps) {
           <circle cx="100" cy="100" r="90" fill="none" stroke="#ff4500" strokeWidth="2" opacity="0.3" />
           <circle cx="100" cy="100" r="75" fill="none" stroke="#ff4500" strokeWidth="1.5" opacity="0.25" />
 
-          {/* Main V Shape */}
           <line x1="45" y1="50" x2="70" y2="85" stroke="#ff4500" strokeWidth="8" strokeLinecap="round" />
           <line x1="70" y1="85" x2="85" y2="110" stroke="#ff4500" strokeWidth="8" strokeLinecap="round" />
           <line x1="85" y1="110" x2="100" y2="135" stroke="#ff4500" strokeWidth="10" strokeLinecap="round" />
-
           <line x1="155" y1="50" x2="130" y2="85" stroke="#ff4500" strokeWidth="8" strokeLinecap="round" />
           <line x1="130" y1="85" x2="115" y2="110" stroke="#ff4500" strokeWidth="8" strokeLinecap="round" />
           <line x1="115" y1="110" x2="100" y2="135" stroke="#ff4500" strokeWidth="10" strokeLinecap="round" />
 
-          {/* Glowing Overlays */}
           <line x1="45" y1="50" x2="70" y2="85" stroke="#ff8c00" strokeWidth="3" strokeLinecap="round" opacity="0.8" />
           <line x1="70" y1="85" x2="85" y2="110" stroke="#ff8c00" strokeWidth="3" strokeLinecap="round" opacity="0.8" />
           <line x1="85" y1="110" x2="100" y2="135" stroke="#ff8c00" strokeWidth="4" strokeLinecap="round" opacity="0.8" />
@@ -197,7 +193,6 @@ export default function HeroSection({ isActive = false }: HeroSectionProps) {
           <line x1="130" y1="85" x2="115" y2="110" stroke="#ff8c00" strokeWidth="3" strokeLinecap="round" opacity="0.8" />
           <line x1="115" y1="110" x2="100" y2="135" stroke="#ff8c00" strokeWidth="4" strokeLinecap="round" opacity="0.8" />
 
-          {/* Node Points */}
           <circle cx="45" cy="50" r="6" fill="#ff4500">
             <animate attributeName="r" values="6;8;6" dur="2s" repeatCount="indefinite" />
             <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" />
@@ -227,12 +222,10 @@ export default function HeroSection({ isActive = false }: HeroSectionProps) {
             <animate attributeName="opacity" values="1;0.6;1" dur="2s" begin="1s" repeatCount="indefinite" />
           </circle>
 
-          {/* Connectors */}
           <line x1="45" y1="50" x2="25" y2="35" stroke="#ff4500" strokeWidth="2" opacity="0.5" />
           <line x1="155" y1="50" x2="175" y2="35" stroke="#ff4500" strokeWidth="2" opacity="0.5" />
           <line x1="100" y1="135" x2="100" y2="160" stroke="#ff4500" strokeWidth="3" opacity="0.5" />
 
-          {/* Decorative Elements */}
           <rect x="20" y="30" width="8" height="8" fill="none" stroke="#ff8c00" strokeWidth="1.5" opacity="0.4" transform="rotate(45 24 34)" />
           <rect x="172" y="30" width="8" height="8" fill="none" stroke="#ff8c00" strokeWidth="1.5" opacity="0.4" transform="rotate(45 176 34)" />
           <rect x="96" y="156" width="8" height="8" fill="none" stroke="#ff8c00" strokeWidth="1.5" opacity="0.4" transform="rotate(45 100 160)" />
@@ -241,7 +234,6 @@ export default function HeroSection({ isActive = false }: HeroSectionProps) {
           <path d="M 155 45 Q 160 40 165 45" stroke="#ff4500" strokeWidth="1.5" fill="none" opacity="0.5" />
         </svg>
       </TronLogo>
-
 
       <Title>VIJALES</Title>
       <Tagline>Software house</Tagline>
