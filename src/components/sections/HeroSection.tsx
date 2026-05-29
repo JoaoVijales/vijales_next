@@ -91,7 +91,7 @@ const Title = styled.h1`
 
 const Subtitle = styled.p`
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.72);
   margin-bottom: 3rem;
   max-width: 580px;
   line-height: 1.9;

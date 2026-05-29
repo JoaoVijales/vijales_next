@@ -141,7 +141,7 @@ const FooterLogoText = styled.span`
 `
 
 const Copyright = styled.div`
-  color: #666;
+  color: #aaa;
   font-size: 0.9rem;
 `
 

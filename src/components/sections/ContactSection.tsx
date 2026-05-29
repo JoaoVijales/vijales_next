@@ -80,7 +80,7 @@ const SectionHeader = styled.div`
 
   p {
     font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
     letter-spacing: 5px;
     font-weight: 300;
     text-transform: uppercase;
@@ -118,7 +118,7 @@ const Container = styled.div`
 
 const Tagline = styled.p`
   font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.55);
+  color: rgba(255, 255, 255, 0.75);
   letter-spacing: 0.5px;
   font-weight: 300;
   line-height: 1.85;
@@ -220,7 +220,7 @@ const WhatsAppIconWrapper = styled.span<{ $isActive?: boolean }>`
 
 const PhoneDisplay = styled.p`
   font-size: 0.62rem;
-  color: rgba(255, 255, 255, 0.25);
+  color: rgba(255, 255, 255, 0.55);
   letter-spacing: 4px;
   font-weight: 300;
   margin: 0;
@@ -232,7 +232,7 @@ const AvailabilityBadge = styled.span<{ $isActive?: boolean }>`
   align-items: center;
   gap: 0.5rem;
   font-size: 0.6rem;
-  color: rgba(37, 211, 102, 0.7);
+  color: rgba(37, 211, 102, 0.9);
   letter-spacing: 2px;
   text-transform: uppercase;
   font-weight: 400;

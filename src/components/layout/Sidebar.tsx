@@ -37,7 +37,7 @@ const SocialLinks = styled.div`
 `
 
 const SocialIcon = styled.a`
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,7 +91,7 @@ const NavDot = styled.button<{ $active: boolean }>`
     right: calc(100% + 1rem);
     top: 50%;
     transform: translateY(-50%);
-    color: ${p => p.$active ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.35)'};
+    color: ${p => p.$active ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.6)'};
     font-size: 0.52rem;
     font-family: var(--font-orbitron), sans-serif;
     text-transform: uppercase;

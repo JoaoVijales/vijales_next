@@ -56,7 +56,7 @@ const SectionHeader = styled.div`
 
   p {
     font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
     letter-spacing: 5px;
     font-weight: 300;
     text-transform: uppercase;
@@ -169,7 +169,7 @@ const ItemContent = styled.div`
   }
 
   p {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.68);
     line-height: 1.7;
     font-size: 0.7rem;
     font-weight: 300;
