@@ -88,7 +88,7 @@ const HeaderSubtitle = styled.p`
   @media (min-width: 1024px) {
     display: block;
     font-size: 0.6rem;
-    color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
     text-transform: uppercase;
     letter-spacing: 6px;
     font-weight: 300;
@@ -239,7 +239,7 @@ const CardTitle = styled.h3`
 `
 
 const CardDescription = styled.p`
-  color: rgba(255, 255, 255, 0.42);
+  color: rgba(255, 255, 255, 0.72);
   line-height: 1.85;
   font-size: 0.7rem;
   font-weight: 300;
@@ -266,7 +266,7 @@ const Deliverables = styled.ul`
 
     li {
       font-size: 0.56rem;
-      color: rgba(255, 255, 255, 0.28);
+      color: rgba(255, 255, 255, 0.55);
       letter-spacing: 0.8px;
       text-transform: uppercase;
       font-family: var(--font-orbitron), sans-serif;
@@ -289,7 +289,7 @@ const Deliverables = styled.ul`
   }
 
   ${Card}:hover & li {
-    color: rgba(255, 255, 255, 0.42);
+    color: rgba(255, 255, 255, 0.75);
 
     &::before {
       background: rgba(255, 69, 0, 0.85);
@@ -312,8 +312,8 @@ const CardFooter = styled.div`
 
 const Tag = styled.span`
   font-size: 0.48rem;
-  color: rgba(255, 255, 255, 0.16);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 2px;
   padding: 0.15rem 0.5rem;
   font-family: var(--font-orbitron), sans-serif;
@@ -355,7 +355,7 @@ const TechStack = styled.div`
 
   .label {
     font-size: 0.48rem;
-    color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.35);
     text-transform: uppercase;
     letter-spacing: 4px;
     margin-right: 0.4rem;
@@ -365,8 +365,8 @@ const TechStack = styled.div`
 
 const TechBadge = styled.span`
   font-size: 0.52rem;
-  color: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 2px;
   padding: 0.2rem 0.6rem;
   font-family: var(--font-orbitron), sans-serif;
@@ -381,7 +381,7 @@ const TechBadge = styled.span`
 
 const CtaLink = styled.a`
   font-size: 0.56rem;
-  color: rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.45);
   text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 3px;
